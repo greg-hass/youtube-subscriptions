@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/home/greg/Documents/youtube-subscriptions/release/YouTube Subscriptions Manager-1.0.0.AppImage\")",
+      "Bash(npm run electron:dist:*)",
+      "Bash(timeout:*)",
+      "Bash(time timeout 15:*)",
+      "Bash(lsof:*)",
+      "Bash(awk:*)",
+      "Bash(xargs:*)",
+      "Bash(time timeout 20:*)",
+      "Bash(killall:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run build:main:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run type-check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

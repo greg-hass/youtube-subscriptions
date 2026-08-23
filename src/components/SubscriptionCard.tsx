@@ -1,10 +1,19 @@
-import { motion } from 'framer-motion';
-import { ExternalLink, Users, Video, Trash2, Heart, Volume2, VolumeX, Clock } from 'lucide-react';
-import type { YouTubeChannel } from '../types/youtube';
-import { useState, memo } from 'react';
-import { useNavigate } from 'react-router';
-import { getDisplayThumbnail, handleImageLoadError } from '../lib/icon-loader';
-import { formatTimeAgo } from '../lib/format';
+import { motion } from "framer-motion";
+import {
+  ExternalLink,
+  Users,
+  Video,
+  Trash2,
+  Heart,
+  Volume2,
+  VolumeX,
+  Clock,
+} from "lucide-react";
+import type { YouTubeChannel } from "../types/youtube";
+import { useState, memo } from "react";
+import { useNavigate } from "react-router";
+import { getDisplayThumbnail, handleImageLoadError } from "../lib/icon-loader";
+import { formatTimeAgo } from "../lib/format";
 
 interface Props {
   channel: YouTubeChannel;
@@ -20,205 +29,244 @@ interface Props {
   onSetGroup?: (channelId: string, group: string) => void;
 }
 
-export const SubscriptionCard = memo(({ channel, groups = [], selectable = false, selected = false, lastUploadAt, onToggleSelect, onRemove, onToggleFavorite, onToggleMute, onSetGroup }: Props) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const navigate = useNavigate();
+export const SubscriptionCard = memo(
+  ({
+    channel,
+    groups = [],
+    selectable = false,
+    selected = false,
+    lastUploadAt,
+    onToggleSelect,
+    onRemove,
+    onToggleFavorite,
+    onToggleMute,
+    onSetGroup,
+  }: Props) => {
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const navigate = useNavigate();
 
-  const openChannel = () => {
-    navigate(`/channel/${channel.id}`);
-  };
+    const openChannel = () => {
+      navigate(`/channel/${channel.id}`);
+    };
 
-  return (
-    <motion.div
-      whileHover={{ y: -8, scale: 1.02 }}
-      onClick={openChannel}
-      className="group cursor-pointer bg-white dark:bg-ios-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-ios-800"
-    >
-      {/* Thumbnail */}
-      <div className="relative aspect-video bg-gray-200 dark:bg-ios-800 overflow-hidden">
-        {!imageLoaded && (
-          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-ios-800 dark:via-ios-700 dark:to-ios-800" />
-        )}
-        <img
-          src={getDisplayThumbnail(channel.thumbnail, channel.title || channel.id)}
-          alt={channel.title}
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            handleImageLoadError(e, channel.id, channel.title);
-          }}
-          onLoad={() => {
-            setImageLoaded(true);
-          }}
-          className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-            } ${channel.isMuted ? 'grayscale opacity-50' : ''
-            }`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+    return (
+      <motion.div
+        whileHover={{ y: -8, scale: 1.02 }}
+        onClick={openChannel}
+        className="group cursor-pointer bg-white dark:bg-ios-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-ios-800"
+      >
+        {/* Thumbnail */}
+        <div className="relative aspect-video bg-gray-200 dark:bg-ios-800 overflow-hidden">
+          {!imageLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-ios-800 dark:via-ios-700 dark:to-ios-800" />
+          )}
+          <img
+            src={getDisplayThumbnail(
+              channel.thumbnail,
+              channel.title || channel.id,
+            )}
+            alt={channel.title}
+            loading="eager"
+            decoding="async"
+            onError={(e) => {
+              handleImageLoadError(e, channel.id, channel.title);
+            }}
+            onLoad={() => {
+              setImageLoaded(true);
+            }}
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            } ${channel.isMuted ? "grayscale opacity-50" : ""}`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        {/* Muted overlay */}
-        {channel.isMuted && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <div className="bg-red-600/90 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 shadow-lg">
-              <VolumeX className="w-4 h-4" />
-              <span>Muted</span>
+          {/* Muted overlay */}
+          {channel.isMuted && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <div className="bg-red-600/90 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 shadow-lg">
+                <VolumeX className="w-4 h-4" />
+                <span>Muted</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Action buttons (always visible on touch screens; hover/focus on desktop) */}
-        <div className="absolute top-2 left-2 flex gap-2 z-10">
-          {selectable && onToggleSelect && (
-            <label
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/60 backdrop-blur-sm"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <input
-                type="checkbox"
-                checked={selected}
-                onChange={() => onToggleSelect(channel.id)}
-                aria-label={`Select ${channel.title}`}
-                className="h-4 w-4 accent-red-600"
-              />
-            </label>
-          )}
-          {onToggleFavorite && (
-            <button
-              type="button"
-              aria-pressed={Boolean(channel.isFavorite)}
-              aria-label={channel.isFavorite ? `Remove ${channel.title} from favorite channels` : `Add ${channel.title} to favorite channels`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite(channel.id);
-              }}
-              className={`flex h-11 w-11 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${channel.isFavorite ? 'opacity-100' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100'
+          {/* Action buttons (always visible on touch screens; hover/focus on desktop) */}
+          <div className="absolute top-2 left-2 flex gap-2 z-10">
+            {selectable && onToggleSelect && (
+              <label
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/60 backdrop-blur-sm"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() => onToggleSelect(channel.id)}
+                  aria-label={`Select ${channel.title}`}
+                  className="h-4 w-4 accent-red-600"
+                />
+              </label>
+            )}
+            {onToggleFavorite && (
+              <button
+                type="button"
+                aria-pressed={Boolean(channel.isFavorite)}
+                aria-label={
+                  channel.isFavorite
+                    ? `Remove ${channel.title} from favorite channels`
+                    : `Add ${channel.title} to favorite channels`
+                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite(channel.id);
+                }}
+                className={`flex h-11 w-11 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                  channel.isFavorite
+                    ? "opacity-100"
+                    : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                 }`}
-              title={channel.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            >
-              <Heart
-                className={`w-5 h-5 transition-all ${channel.isFavorite
-                  ? 'fill-red-400 text-red-400'
-                  : 'text-white'
+                title={
+                  channel.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
+              >
+                <Heart
+                  className={`w-5 h-5 transition-all ${
+                    channel.isFavorite
+                      ? "fill-red-400 text-red-400"
+                      : "text-white"
                   }`}
-              />
-            </button>
-          )}
-          {onToggleMute && (
+                />
+              </button>
+            )}
+            {onToggleMute && (
+              <button
+                type="button"
+                aria-pressed={Boolean(channel.isMuted)}
+                aria-label={
+                  channel.isMuted
+                    ? `Unmute ${channel.title}`
+                    : `Mute ${channel.title}`
+                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleMute(channel.id);
+                }}
+                className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                  channel.isMuted
+                    ? "opacity-100 bg-red-600/90 text-white"
+                    : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 bg-black/50 hover:bg-black/70 text-white"
+                }`}
+                title={channel.isMuted ? "Unmute channel" : "Mute channel"}
+              >
+                {channel.isMuted ? (
+                  <VolumeX className="w-5 h-5" />
+                ) : (
+                  <Volume2 className="w-5 h-5" />
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Hover overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              whileHover={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-white/90 dark:bg-ios-900/90 rounded-full p-3"
+            >
+              <ExternalLink className="w-6 h-6 text-red-600" />
+            </motion.div>
+          </motion.div>
+
+          {/* Unsubscribe button — tightened hit area; Undo toast in SubscriptionsList is the safety net */}
+          {onRemove && (
             <button
               type="button"
-              aria-pressed={Boolean(channel.isMuted)}
-              aria-label={channel.isMuted ? `Unmute ${channel.title}` : `Mute ${channel.title}`}
               onClick={(e) => {
                 e.stopPropagation();
-                onToggleMute(channel.id);
+                onRemove(channel.id);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${channel.isMuted ? 'opacity-100 bg-red-600/90 text-white' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 bg-black/50 hover:bg-black/70 text-white'
-                }`}
-              title={channel.isMuted ? 'Unmute channel' : 'Mute channel'}
+              className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0"
+              title={`Unsubscribe from ${channel.title}`}
+              aria-label={`Unsubscribe from ${channel.title}`}
             >
-              {channel.isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Hover overlay */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileHover={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            className="bg-white/90 dark:bg-ios-900/90 rounded-full p-3"
-          >
-            <ExternalLink className="w-6 h-6 text-red-600" />
-          </motion.div>
-        </motion.div>
+        {/* Info */}
+        <div className="p-3 sm:p-4">
+          <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-1 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+            {channel.title}
+          </h3>
 
-        {/* Unsubscribe button — tightened hit area; Undo toast in SubscriptionsList is the safety net */}
-        {onRemove && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(channel.id);
-            }}
-            className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0"
-            title={`Unsubscribe from ${channel.title}`}
-            aria-label={`Unsubscribe from ${channel.title}`}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
+          {lastUploadAt && (
+            <p className="mb-2 flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-ios-400">
+              <Clock className="h-3.5 w-3.5" />
+              Last upload {formatTimeAgo(new Date(lastUploadAt))}
+            </p>
+          )}
 
-      {/* Info */}
-      <div className="p-3 sm:p-4">
-        <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-1 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-          {channel.title}
-        </h3>
+          {onSetGroup && (
+            <div className="mb-3">
+              <label htmlFor={`group-${channel.id}`} className="sr-only">
+                Group for {channel.title}
+              </label>
+              <select
+                id={`group-${channel.id}`}
+                aria-label={`Group for ${channel.title}`}
+                value={channel.group || ""}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onSetGroup?.(channel.id, e.target.value);
+                }}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 outline-none transition-colors hover:bg-gray-100 focus:border-red-500 dark:border-ios-800 dark:bg-ios-800 dark:text-ios-200 dark:hover:bg-ios-700"
+              >
+                <option value="">Ungrouped</option>
+                {groups.map((group) => (
+                  <option key={group} value={group}>
+                    {group}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-        {lastUploadAt && (
-          <p className="mb-2 flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-ios-400">
-            <Clock className="h-3.5 w-3.5" />
-            Last upload {formatTimeAgo(new Date(lastUploadAt))}
-          </p>
-        )}
+          {channel.description && (
+            <p className="text-sm text-gray-600 dark:text-ios-400 line-clamp-2 mb-3">
+              {channel.description}
+            </p>
+          )}
 
-        {onSetGroup && (
-          <div className="mb-3">
-            <label htmlFor={`group-${channel.id}`} className="sr-only">
-              Group for {channel.title}
-            </label>
-            <select
-              id={`group-${channel.id}`}
-              aria-label={`Group for ${channel.title}`}
-              value={channel.group || ''}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                e.stopPropagation();
-                onSetGroup?.(channel.id, e.target.value);
-              }}
-              className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 outline-none transition-colors hover:bg-gray-100 focus:border-red-500 dark:border-ios-800 dark:bg-ios-800 dark:text-ios-200 dark:hover:bg-ios-700"
-            >
-              <option value="">Ungrouped</option>
-              {groups.map((group) => (
-                <option key={group} value={group}>
-                  {group}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {channel.description && (
-          <p className="text-sm text-gray-600 dark:text-ios-400 line-clamp-2 mb-3">
-            {channel.description}
-          </p>
-        )}
-
-        {(channel.subscriberCount || channel.videoCount) && (
-          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-ios-500">
-            {channel.subscriberCount && (
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                <span>{formatCount(channel.subscriberCount)}</span>
-              </div>
-            )}
-            {channel.videoCount && (
-              <div className="flex items-center gap-1">
-                <Video className="w-4 h-4" />
-                <span>{formatCount(channel.videoCount)}</span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
-});
+          {(channel.subscriberCount || channel.videoCount) && (
+            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-ios-500">
+              {channel.subscriberCount && (
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  <span>{formatCount(channel.subscriberCount)}</span>
+                </div>
+              )}
+              {channel.videoCount && (
+                <div className="flex items-center gap-1">
+                  <Video className="w-4 h-4" />
+                  <span>{formatCount(channel.videoCount)}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  },
+);
 
 function formatCount(count: string): string {
   const num = parseInt(count);

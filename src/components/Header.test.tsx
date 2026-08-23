@@ -194,6 +194,12 @@ describe("Header", () => {
 		).toBe("");
 	});
 
+	it("marks the main header for standalone PWA safe-area clearance", () => {
+		render(<Header />);
+
+		expect(document.querySelector("header")).toHaveClass("app-header", "safe-top");
+	});
+
 	it("shows a pulsing refresh dot next to the channel count while syncing", () => {
 		render(
 			<Header

@@ -29,4 +29,11 @@ describe('PWA runtime caching', () => {
     expect(indexHtml).not.toContain('content="black"');
     expect(indexHtml).not.toContain('black-translucent');
   });
+
+  it('gives only the standalone app header a two-pixel blur clearance', () => {
+    const appCss = readFileSync(new URL('./src/index.css', import.meta.url), 'utf8');
+
+    expect(appCss).toContain('@media (display-mode: standalone)');
+    expect(appCss).toContain('padding-top: calc(env(safe-area-inset-top) + 2px)');
+  });
 });

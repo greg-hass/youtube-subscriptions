@@ -77,6 +77,12 @@
     padding-top: env(safe-area-inset-top);
   }
 
+  @media (display-mode: standalone) {
+    .app-header {
+      padding-top: calc(env(safe-area-inset-top) + 2px);
+    }
+  }
+
   .safe-top-0 {
     padding-top: 0;
   }

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, ChevronDown, RefreshCw } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
 import { Header } from "./Header";
 import { VirtualizedVideoGrid } from "./VirtualizedVideoGrid";
 import { useRSSVideos } from "../hooks/useRSSVideos";
@@ -11,12 +11,15 @@ import {
 } from "../lib/icon-loader";
 import { useStore } from "../store/useStore";
 
+const CHANNEL_VIDEO_LIMIT = 15;
+
 export const ChannelViewer = () => {
   const { channelId } = useParams<{ channelId: string }>();
   const navigate = useNavigate();
   const { allSubscriptions } = useSubscriptionStorage();
   const { watchedVideos, markAsWatched } = useStore();
   const [hideWatched, setHideWatched] = useState(false);
+  const attemptedBackfillChannel = useRef<string | null>(null);
 
   // Get channel info from subscriptions
   const channelInfo = allSubscriptions.find((sub) => sub.id === channelId);
@@ -37,7 +40,8 @@ export const ChannelViewer = () => {
       .sort(
         (a, b) =>
           new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-      );
+      )
+      .slice(0, CHANNEL_VIDEO_LIMIT);
   }, [allVideos, channelId]);
 
   const videos = useMemo(() => {
@@ -85,6 +89,29 @@ export const ChannelViewer = () => {
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [channelId]);
+
+  useEffect(() => {
+    if (
+      !channelId ||
+      !channelInfo ||
+      isLoading ||
+      isBackfilling ||
+      channelVideos.length >= CHANNEL_VIDEO_LIMIT ||
+      attemptedBackfillChannel.current === channelId
+    ) {
+      return;
+    }
+
+    attemptedBackfillChannel.current = channelId;
+    backfillChannel(channelId);
+  }, [
+    backfillChannel,
+    channelId,
+    channelInfo,
+    channelVideos.length,
+    isBackfilling,
+    isLoading,
+  ]);
 
   if (!channelId) {
     return null;
@@ -233,41 +260,20 @@ export const ChannelViewer = () => {
                   </p>
                 </div>
               ) : (
-                <>
-                  <VirtualizedVideoGrid
-                    videos={videos}
-                    columns={4}
-                    channelThumbnails={
-                      resolvedChannelInfo
-                        ? new Map([
-                            [
-                              resolvedChannelInfo.id,
-                              resolvedChannelInfo.thumbnail,
-                            ],
-                          ])
-                        : undefined
-                    }
-                  />
-                  <div className="mt-6 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={() => channelId && backfillChannel(channelId)}
-                      disabled={isBackfilling || isLoading}
-                      aria-busy={isBackfilling}
-                      data-testid="load-more-videos"
-                      className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-800 transition-all hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-ios-800 dark:text-ios-100 dark:hover:bg-ios-700"
-                    >
-                      <ChevronDown
-                        className={`w-4 h-4 ${isBackfilling ? "animate-bounce" : ""}`}
-                      />
-                      <span>
-                        {isBackfilling
-                          ? "Loading older videos…"
-                          : "Load more videos"}
-                      </span>
-                    </button>
-                  </div>
-                </>
+                <VirtualizedVideoGrid
+                  videos={videos}
+                  columns={4}
+                  channelThumbnails={
+                    resolvedChannelInfo
+                      ? new Map([
+                          [
+                            resolvedChannelInfo.id,
+                            resolvedChannelInfo.thumbnail,
+                          ],
+                        ])
+                      : undefined
+                  }
+                />
               )}
             </div>
           )}

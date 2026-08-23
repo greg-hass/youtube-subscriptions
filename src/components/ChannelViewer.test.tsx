@@ -19,9 +19,23 @@ let mockWatchedVideos = new Set<string>();
 const mockMarkAsWatched = vi.fn();
 const mockSetSearchQuery = vi.fn();
 const mockBackfillChannel = vi.fn();
+let mockGridVideos = mockVideos;
 
 vi.mock("./Header", () => ({
   Header: () => <header>Header</header>,
+}));
+
+vi.mock("./VirtualizedVideoGrid", () => ({
+  VirtualizedVideoGrid: ({ videos }: { videos: typeof mockVideos }) => {
+    mockGridVideos = videos;
+    return (
+      <div data-testid="latest-videos-timeline">
+        {videos.map((video) => (
+          <div key={video.id}>{video.title}</div>
+        ))}
+      </div>
+    );
+  },
 }));
 
 vi.mock("../hooks/useRSSVideos", () => ({
@@ -76,6 +90,7 @@ describe("ChannelViewer", () => {
         publishedAt: new Date().toISOString(),
       },
     ];
+    mockGridVideos = mockVideos;
 
     class ResizeObserverMock {
       observe = vi.fn();
@@ -257,7 +272,7 @@ describe("ChannelViewer", () => {
     expect(mockMarkAsWatched).toHaveBeenCalledWith("video-2");
   });
 
-  it("offers a load-more control that backfills the channel timeline", () => {
+  it("automatically backfills a channel with fewer than 15 cached videos", () => {
     mockVideos = [
       {
         id: "video-1",
@@ -278,10 +293,33 @@ describe("ChannelViewer", () => {
       </MemoryRouter>,
     );
 
-    const loadMore = screen.getByTestId("load-more-videos");
-    expect(loadMore).toBeInTheDocument();
-    fireEvent.click(loadMore);
-
     expect(mockBackfillChannel).toHaveBeenCalledWith("UC123");
+    expect(screen.queryByText("Load more videos")).not.toBeInTheDocument();
+  });
+
+  it("shows only the newest 15 channel videos", () => {
+    mockVideos = Array.from({ length: 16 }, (_, index) => ({
+      id: `video-${index + 1}`,
+      title: `Channel upload ${index + 1}`,
+      description: "",
+      thumbnail: `https://example.com/video-${index + 1}.jpg`,
+      channelId: "UC123",
+      channelTitle: "Test Channel",
+      publishedAt: new Date(Date.UTC(2026, 4, index + 1)).toISOString(),
+    }));
+
+    render(
+      <MemoryRouter initialEntries={["/channel/UC123"]}>
+        <Routes>
+          <Route path="/channel/:channelId" element={<ChannelViewer />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("15 videos")).toBeInTheDocument();
+    expect(mockGridVideos).toHaveLength(15);
+    expect(mockGridVideos[0].title).toBe("Channel upload 16");
+    expect(mockGridVideos.at(-1)?.title).toBe("Channel upload 2");
+    expect(mockBackfillChannel).not.toHaveBeenCalled();
   });
 });

@@ -176,7 +176,7 @@ describe('VirtualizedVideoGrid', () => {
         expect(screen.getByText('Video 2')).toBeInTheDocument();
     });
 
-    it('keeps the visible timeline stable while an inline video is playing', async () => {
+    it('adds refreshed videos live without moving the active inline player', async () => {
         const initialVideos = videos.slice(0, 3);
         const refreshedVideos: YouTubeVideo[] = [
             {
@@ -193,7 +193,7 @@ describe('VirtualizedVideoGrid', () => {
 
         rerender(<VirtualizedVideoGrid videos={refreshedVideos} columns={4} />);
 
-        expect(screen.queryByText('Newly fetched video')).not.toBeInTheDocument();
+        expect(screen.getByText('Newly fetched video')).toBeInTheDocument();
         expect(screen.getByText('Video 0')).toBeInTheDocument();
         expect(screen.getByText('Video 1')).toBeInTheDocument();
         expect(screen.getByText('Video 2')).toBeInTheDocument();

@@ -44,6 +44,25 @@ export const VirtualizedVideoGrid = ({ videos, columns = 4, scrollStorageKey, ch
 
     useEffect(() => {
         latestVideosRef.current = videos;
+
+        setInlinePlaybackVideos((currentVideos) => {
+            if (!currentVideos || !inlinePlaybackVideoIdRef.current) return currentVideos;
+
+            const currentIds = new Set(currentVideos.map((video) => video.id));
+            const newVideos = videos.filter((video) => !currentIds.has(video.id));
+            if (newVideos.length === 0) return currentVideos;
+
+            const playingIndex = currentVideos.findIndex(
+                (video) => video.id === inlinePlaybackVideoIdRef.current,
+            );
+            const insertionIndex = playingIndex < 0 ? currentVideos.length : playingIndex + 1;
+
+            return [
+                ...currentVideos.slice(0, insertionIndex),
+                ...newVideos,
+                ...currentVideos.slice(insertionIndex),
+            ];
+        });
     }, [videos]);
 
     useEffect(() => {

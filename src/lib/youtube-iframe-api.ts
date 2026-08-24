@@ -59,7 +59,7 @@ export function loadYouTubeIframeApi() {
   return youtubeApiPromise;
 }
 
-export function allowEnhancedMediaPlayback(player: YouTubePlayer) {
+export function configureInlineMediaPlayback(player: YouTubePlayer) {
   const iframe = player.getIframe?.();
   if (!iframe) return;
 
@@ -75,6 +75,6 @@ export function allowEnhancedMediaPlayback(player: YouTubePlayer) {
       'web-share',
     ].join('; ')
   );
-  iframe.setAttribute('allowfullscreen', '');
-  iframe.setAttribute('webkitallowfullscreen', '');
+  iframe.removeAttribute('allowfullscreen');
+  iframe.removeAttribute('webkitallowfullscreen');
 }

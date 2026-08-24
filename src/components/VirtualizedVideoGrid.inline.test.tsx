@@ -115,6 +115,11 @@ describe('VirtualizedVideoGrid inline playback', () => {
             <MemoryRouter>
                 <VirtualizedVideoGrid
                     videos={[
+						{
+							...videos[1],
+							id: 'new-video',
+							title: 'Newly refreshed video',
+						},
                         { ...videos[0], title: 'Playing video refreshed' },
                         videos[1],
                     ]}
@@ -126,5 +131,6 @@ describe('VirtualizedVideoGrid inline playback', () => {
         expect(playerConstructor).toHaveBeenCalledTimes(1);
         expect(destroy).not.toHaveBeenCalled();
         expect(screen.getByTestId('inline-video-player')).toBeInTheDocument();
+		expect(screen.getByText('Newly refreshed video')).toBeInTheDocument();
     });
 });

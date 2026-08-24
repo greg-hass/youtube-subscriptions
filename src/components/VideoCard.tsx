@@ -7,6 +7,8 @@ import {
 	Trash2,
 	Radio,
 	PictureInPicture2,
+	Maximize2,
+	Minimize2,
 } from "lucide-react";
 import type { YouTubeVideo } from "../types/youtube";
 import { useEffect, useRef, useState } from "react";
@@ -27,7 +29,7 @@ import {
 	saveVideoProgress,
 } from "../lib/video-progress";
 import {
-	allowEnhancedMediaPlayback,
+	configureInlineMediaPlayback,
 	loadYouTubeIframeApi,
 	type YouTubePlayer,
 } from "../lib/youtube-iframe-api";
@@ -68,6 +70,7 @@ const StatefulVideoCard = ({
 		}),
 	);
 	const [isPlayingInline, setIsPlayingInline] = useState(false);
+	const [isExpandedInline, setIsExpandedInline] = useState(false);
 	const [dragOffsetX, setDragOffsetX] = useState(0);
 	const thumbnailFallbackCountRef = useRef(0);
 	const pointerStartRef = useRef<{
@@ -84,6 +87,7 @@ const StatefulVideoCard = ({
 		getVideoProgressPercent(video.id),
 	);
 	const inlinePlayerContainerRef = useRef<HTMLDivElement | null>(null);
+	const inlineVideoSurfaceRef = useRef<HTMLDivElement | null>(null);
 	const inlinePlayerRef = useRef<YouTubePlayer | null>(null);
 	const inlineSaveIntervalRef = useRef<ReturnType<
 		typeof window.setInterval
@@ -104,6 +108,32 @@ const StatefulVideoCard = ({
 	useEffect(() => {
 		isWatchedRef.current = isWatched;
 	}, [isWatched]);
+
+	useEffect(() => {
+		if (!isExpandedInline) return;
+
+		const previousOverflow = document.body.style.overflow;
+		const collapsePlayer = (event: KeyboardEvent) => {
+			if (event.key === "Escape") setIsExpandedInline(false);
+		};
+
+		document.body.style.overflow = "hidden";
+		window.addEventListener("keydown", collapsePlayer);
+
+		return () => {
+			document.body.style.overflow = previousOverflow;
+			window.removeEventListener("keydown", collapsePlayer);
+		};
+	}, [isExpandedInline]);
+
+	useEffect(() => {
+		const handleFullscreenChange = () => {
+			if (!document.fullscreenElement) setIsExpandedInline(false);
+		};
+
+		document.addEventListener("fullscreenchange", handleFullscreenChange);
+		return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+	}, []);
 
 	useEffect(() => {
 		const updateProgress = () =>
@@ -184,12 +214,13 @@ const StatefulVideoCard = ({
 					playerVars: {
 						autoplay: 1,
 						playsinline: 1,
+						fs: 0,
 						rel: 0,
 						start: resumeFromSeconds,
 					},
 					events: {
 						onReady: (event) => {
-							allowEnhancedMediaPlayback(event.target);
+							configureInlineMediaPlayback(event.target);
 							if (resumeFromSeconds > 0) {
 								event.target.seekTo(resumeFromSeconds, true);
 							}
@@ -238,6 +269,19 @@ const StatefulVideoCard = ({
 
 	const playInline = () => {
 		setIsPlayingInline(true);
+	};
+
+	const toggleExpandedInline = () => {
+		if (isExpandedInline) {
+			if (document.fullscreenElement) void document.exitFullscreen();
+			setIsExpandedInline(false);
+			return;
+		}
+
+		setIsExpandedInline(true);
+		void inlineVideoSurfaceRef.current?.requestFullscreen?.().catch(() => {
+			// The fixed-position fallback still provides an app-owned expanded player.
+		});
 	};
 
 	const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -436,14 +480,41 @@ const StatefulVideoCard = ({
 				</div>
 			)}
 			{/* Thumbnail */}
-			<div className="relative aspect-video overflow-hidden bg-black">
+			<div
+				ref={inlineVideoSurfaceRef}
+				data-testid="inline-video-surface"
+				className={
+					isExpandedInline
+						? "fixed inset-0 z-[100] flex items-center bg-black"
+						: "relative aspect-video overflow-hidden bg-black"
+				}
+			>
 				{isPlayingInline ? (
-					<div
-						ref={inlinePlayerContainerRef}
-						data-testid="inline-video-player"
-						title={`${displayTitle} player`}
-						className="h-full w-full"
-					/>
+					<>
+						<div className={isExpandedInline ? "aspect-video w-full" : "h-full w-full"}>
+							<div
+								ref={inlinePlayerContainerRef}
+								data-testid="inline-video-player"
+								title={`${displayTitle} player`}
+								className="h-full w-full"
+							/>
+						</div>
+						<button
+							type="button"
+							onClick={toggleExpandedInline}
+							aria-label={isExpandedInline ? "Collapse inline video" : "Expand inline video"}
+							title={isExpandedInline ? "Collapse video" : "Expand video"}
+							className={`absolute right-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-black/75 text-white shadow-lg backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+								isExpandedInline ? "top-[max(0.75rem,env(safe-area-inset-top))]" : "top-3"
+							}`}
+						>
+							{isExpandedInline ? (
+								<Minimize2 className="h-5 w-5" />
+							) : (
+								<Maximize2 className="h-5 w-5" />
+							)}
+						</button>
+					</>
 				) : (
 					<button
 						type="button"

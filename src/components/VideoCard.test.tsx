@@ -537,6 +537,58 @@ describe("VideoCard", () => {
 		expect(screen.getByTestId("location")).toHaveTextContent("/");
 	});
 
+	it("uses the app-owned expanded player instead of iOS native video fullscreen", async () => {
+		let playerOptions: any;
+		const iframe = document.createElement("iframe");
+		iframe.setAttribute("allowfullscreen", "");
+		iframe.setAttribute("webkitallowfullscreen", "");
+		window.YT = {
+			PlayerState: { ENDED: 0 },
+			Player: class {
+				constructor(_element: HTMLElement, options: any) {
+					playerOptions = options;
+					window.setTimeout(() => options.events.onReady({ target: this }), 0);
+				}
+
+				getIframe = () => iframe;
+				getCurrentTime = () => 0;
+				getDuration = () => 120;
+				destroy = vi.fn();
+				seekTo = vi.fn();
+				playVideo = vi.fn();
+			},
+		};
+
+		render(
+			<MemoryRouter>
+				<VideoCard video={video} index={0} />
+			</MemoryRouter>,
+		);
+
+		const surface = screen.getByTestId("inline-video-surface");
+		const requestFullscreen = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(surface, "requestFullscreen", {
+			configurable: true,
+			value: requestFullscreen,
+		});
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Play A useful video inline" }),
+		);
+
+		await waitFor(() => {
+			expect(playerOptions.playerVars).toMatchObject({ playsinline: 1, fs: 0 });
+			expect(iframe).not.toHaveAttribute("allowfullscreen");
+			expect(iframe).not.toHaveAttribute("webkitallowfullscreen");
+		});
+
+		fireEvent.click(screen.getByRole("button", { name: "Expand inline video" }));
+
+		expect(requestFullscreen).toHaveBeenCalledTimes(1);
+		expect(surface).toHaveClass("fixed", "inset-0");
+		expect(screen.getByRole("button", { name: "Collapse inline video" })).toBeInTheDocument();
+	});
+
 	it("opens YouTube at the saved playback position", () => {
 		localStorage.setItem(
 			"video-playback-progress",

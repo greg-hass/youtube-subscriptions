@@ -537,11 +537,9 @@ describe("VideoCard", () => {
 		expect(screen.getByTestId("location")).toHaveTextContent("/");
 	});
 
-	it("uses the app-owned expanded player instead of iOS native video fullscreen", async () => {
+	it("allows the YouTube player to use iOS native video fullscreen", async () => {
 		let playerOptions: any;
 		const iframe = document.createElement("iframe");
-		iframe.setAttribute("allowfullscreen", "");
-		iframe.setAttribute("webkitallowfullscreen", "");
 		window.YT = {
 			PlayerState: { ENDED: 0 },
 			Player: class {
@@ -565,28 +563,18 @@ describe("VideoCard", () => {
 			</MemoryRouter>,
 		);
 
-		const surface = screen.getByTestId("inline-video-surface");
-		const requestFullscreen = vi.fn().mockResolvedValue(undefined);
-		Object.defineProperty(surface, "requestFullscreen", {
-			configurable: true,
-			value: requestFullscreen,
-		});
-
 		fireEvent.click(
 			screen.getByRole("button", { name: "Play A useful video inline" }),
 		);
 
 		await waitFor(() => {
-			expect(playerOptions.playerVars).toMatchObject({ playsinline: 1, fs: 0 });
-			expect(iframe).not.toHaveAttribute("allowfullscreen");
-			expect(iframe).not.toHaveAttribute("webkitallowfullscreen");
+			expect(playerOptions.playerVars).toMatchObject({ playsinline: 1 });
+			expect(playerOptions.playerVars).not.toHaveProperty("fs");
+			expect(iframe).toHaveAttribute("allowfullscreen");
+			expect(iframe).toHaveAttribute("webkitallowfullscreen");
 		});
 
-		fireEvent.click(screen.getByRole("button", { name: "Expand inline video" }));
-
-		expect(requestFullscreen).toHaveBeenCalledTimes(1);
-		expect(surface).toHaveClass("fixed", "inset-0");
-		expect(screen.getByRole("button", { name: "Collapse inline video" })).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Expand inline video" })).not.toBeInTheDocument();
 	});
 
 	it("opens YouTube at the saved playback position", () => {

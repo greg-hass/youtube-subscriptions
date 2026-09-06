@@ -1,0 +1,9 @@
+{
+  "channels": 200,
+  "videos": 5000,
+  "requests": 35,
+  "measuredRequests": 30,
+  "fullCacheReads": 0,
+  "medianMs": 1.9251669999999876,
+  "p95Ms": 2.245207999999991
+}

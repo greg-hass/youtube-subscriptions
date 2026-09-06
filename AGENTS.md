@@ -249,3 +249,13 @@ When making changes:
 - **PWA-capable:** Frontend supports PWA install via `vite-plugin-pwa`.
 - **Rate limiting:** Mutating API requests are rate-limited (`30 req / 60s
   window` by default).
+
+## Agent setup and verification
+
+- Use Node 24 (`.node-version`) for frontend, server, and native SQLite dependencies.
+- In a new checkout/worktree, run `node scripts/setup.mjs`. It installs both lockfiles and Chromium; `npm run doctor` diagnoses the runtime and optional Docker availability.
+- Use `npm run qa` for an authenticated browser against an isolated production build and real API. Use `npm run qa:dev` for HMR. Both allocate ports and create disposable data under ignored `output/qa/`; never point them at production data.
+- `npm run test:e2e` owns its build, API, and database. Do not attach the tests to an existing dev server. It checks matching frontend/API build identities before each test.
+- Run `npm run check` for lint/types/coverage; `npm run check:full` also runs production browser QA and container smoke when Docker is available. Treat UNAVAILABLE checks as verification gaps, not passes.
+- Each QA run prints its URL and artifact directory. Use `server.log`, the HTML report, and retained Playwright traces to investigate failures. Run credentials are in private `run.json`; do not publish the manifest, SQLite database, or browser profile.
+- Device-specific playback and installed-PWA behavior still require separate Safari and Home Screen PWA checks on the actual device. A Chromium viewport check is not device evidence.

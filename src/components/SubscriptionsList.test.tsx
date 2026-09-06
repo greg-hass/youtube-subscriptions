@@ -21,17 +21,6 @@ let mockSubscriptions = [
 const mockSetSubscriptionGroup = vi.fn();
 const mockClearGroup = vi.fn();
 
-vi.mock("framer-motion", () => ({
-  motion: {
-    div: ({ animate, children, initial, transition, ...props }: any) => {
-      void animate;
-      void initial;
-      void transition;
-      return <div {...props}>{children}</div>;
-    },
-  },
-}));
-
 vi.mock("../hooks/useSubscriptionStorage", () => ({
   useSubscriptionStorage: () => ({
     subscriptions: mockSubscriptions,

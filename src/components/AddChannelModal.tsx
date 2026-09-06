@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
 	X,
@@ -177,9 +176,9 @@ function ModalBody({
 					onSelectVideo={onSelectVideo}
 				/>
 
-				<AnimatePresence initial={false}>
+				<>
 					{search.showFormats && <SupportedFormatsSection />}
-				</AnimatePresence>
+				</>
 			</div>
 		</div>
 	);
@@ -275,11 +274,11 @@ function SearchStatusDisplay({
 }) {
 	return (
 		<>
-			<AnimatePresence initial={false}>
+			<>
 				{isSearching && !hasResults && <SearchLoadingSkeleton />}
-			</AnimatePresence>
+			</>
 
-			<AnimatePresence initial={false}>
+			<>
 				{hasResults && (
 					<SearchResultsSection
 						results={visibleSearchResults}
@@ -297,7 +296,7 @@ function SearchStatusDisplay({
 						)}
 					/>
 				)}
-			</AnimatePresence>
+			</>
 
 			<NoResultsBlock
 				isSearching={isSearching || isValidating}
@@ -310,7 +309,7 @@ function SearchStatusDisplay({
 
 			<SearchErrorStates searchError={searchError} isSearching={isSearching} />
 
-			<AnimatePresence initial={false}>
+			<>
 				{channelInfo && !previewChannel && (
 					<AddChannelPreview
 						channel={channelInfo}
@@ -320,7 +319,7 @@ function SearchStatusDisplay({
 						onDismiss={onDismiss}
 					/>
 				)}
-			</AnimatePresence>
+			</>
 		</>
 	);
 }
@@ -410,9 +409,9 @@ function NoResultsBlock({
 		hasSubmittedSearch;
 
 	return (
-		<AnimatePresence initial={false}>
+		<>
 			{showNoResults && <NoResultsState query={input} />}
-		</AnimatePresence>
+		</>
 	);
 }
 
@@ -421,8 +420,7 @@ function AddChannelHeader({ onClose }: { onClose: () => void }) {
 		<div className="sticky top-0 z-10 glass safe-top border-b border-gray-200 dark:border-ios-800/80 shadow-sm shrink-0">
 			<div className="max-w-7xl mx-auto px-4">
 				<div className="flex h-[var(--app-header-height)] items-center justify-between gap-3 xl:gap-4">
-					<motion.div
-						whileHover={{ scale: 1.03 }}
+					<div
 						className="flex items-center gap-3 min-w-0"
 					>
 						<img
@@ -439,7 +437,7 @@ function AddChannelHeader({ onClose }: { onClose: () => void }) {
 								<p id="add-channel-title">Add Channel</p>
 							</div>
 						</div>
-					</motion.div>
+					</div>
 
 					<button
 						onClick={onClose}
@@ -633,41 +631,32 @@ function VideoSearchSection({
 
 	if (!hasQuery) {
 		return (
-			<motion.section
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
+			<section
 				className="space-y-3"
 			>
 				<p className="text-sm text-gray-500 dark:text-ios-400">
 					Type at least 2 characters to search for videos by title.
 				</p>
-			</motion.section>
+			</section>
 		);
 	}
 
 	if (state.phase === "loading") {
 		return (
-			<motion.section
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
+			<section
 				className="space-y-3"
 			>
 				<div className="flex items-center gap-2 text-sm text-gray-500 dark:text-ios-400">
 					<div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
 					Searching latest videos…
 				</div>
-			</motion.section>
+			</section>
 		);
 	}
 
 	if (state.phase === "error") {
 		return (
-			<motion.section
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
+			<section
 				className="space-y-3"
 			>
 				<p
@@ -676,33 +665,27 @@ function VideoSearchSection({
 				>
 					Video search failed. Check your connection and try again.
 				</p>
-			</motion.section>
+			</section>
 		);
 	}
 
 	if (state.phase === "idle") {
 		return (
-			<motion.section
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
+			<section
 				className="space-y-3"
 			>
 				<p className="text-sm text-gray-500 dark:text-ios-400">
 					Press Enter or Search to find the latest videos with your words in the
 					title.
 				</p>
-			</motion.section>
+			</section>
 		);
 	}
 
 	const { videos } = state;
 
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: 8 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, y: 8 }}
+		<section
 			className="space-y-3"
 			data-testid="video-search-results"
 		>
@@ -774,7 +757,7 @@ function VideoSearchSection({
 										)}
 									</span>
 								</button>
-								<AnimatePresence initial={false}>
+								<>
 									{isPreviewing && previewChannel && (
 										<AddChannelPreview
 											channel={previewChannel}
@@ -784,22 +767,19 @@ function VideoSearchSection({
 											onDismiss={onDismiss}
 										/>
 									)}
-								</AnimatePresence>
+								</>
 							</div>
 						);
 					})}
 				</div>
 			)}
-		</motion.section>
+		</section>
 	);
 }
 
 function SearchLoadingSkeleton() {
 	return (
-		<motion.section
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
+		<section
 			className="space-y-3"
 		>
 			<div className="flex items-center gap-2 text-sm text-gray-500 dark:text-ios-400">
@@ -820,7 +800,7 @@ function SearchLoadingSkeleton() {
 					</div>
 				))}
 			</div>
-		</motion.section>
+		</section>
 	);
 }
 
@@ -838,10 +818,7 @@ function SearchResultsSection({
 	renderPreview: (channel: YouTubeChannel) => React.ReactNode;
 }) {
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: 8 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, y: 8 }}
+		<section
 			className="space-y-3"
 		>
 			<div className="flex items-center justify-between">
@@ -919,23 +896,20 @@ function SearchResultsSection({
 									</span>
 								</span>
 							</button>
-							<AnimatePresence initial={false}>
+							<>
 								{isPreviewing && renderPreview(channel)}
-							</AnimatePresence>
+							</>
 						</div>
 					);
 				})}
 			</div>
-		</motion.section>
+		</section>
 	);
 }
 
 function NoResultsState({ query }: { query: string }) {
 	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
+		<div
 			className="text-center py-8"
 		>
 			<Search className="w-12 h-12 text-gray-300 dark:text-ios-700 mx-auto mb-3" />
@@ -945,7 +919,7 @@ function NoResultsState({ query }: { query: string }) {
 			<p className="text-xs text-gray-400 dark:text-ios-500 mt-1">
 				Try a different search term or enter a YouTube URL
 			</p>
-		</motion.div>
+		</div>
 	);
 }
 
@@ -957,12 +931,9 @@ function SearchErrorStates({
 	isSearching: boolean;
 }) {
 	return (
-		<AnimatePresence initial={false}>
+		<>
 			{!isSearching && searchError === "auth" && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
+				<div
 					className="text-center py-8"
 					data-testid="channel-search-auth-error"
 				>
@@ -973,13 +944,10 @@ function SearchErrorStates({
 					<p className="text-xs text-gray-500 dark:text-ios-400 mt-1">
 						Set your Server API Token in Settings to search for channels.
 					</p>
-				</motion.div>
+				</div>
 			)}
 			{!isSearching && searchError === "network" && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
+				<div
 					className="text-center py-8"
 					data-testid="channel-search-network-error"
 				>
@@ -987,13 +955,10 @@ function SearchErrorStates({
 					<p className="text-sm text-gray-500 dark:text-ios-400">
 						Search unavailable — check your connection and try again.
 					</p>
-				</motion.div>
+				</div>
 			)}
 			{!isSearching && searchError === "rate_limit" && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
+				<div
 					className="text-center py-8"
 					data-testid="channel-search-rate-limit-error"
 				>
@@ -1004,13 +969,10 @@ function SearchErrorStates({
 					<p className="text-xs text-gray-500 dark:text-ios-400 mt-1">
 						Wait a minute, then try again.
 					</p>
-				</motion.div>
+				</div>
 			)}
 			{!isSearching && searchError === "server" && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
+				<div
 					className="text-center py-8"
 					data-testid="channel-search-server-error"
 				>
@@ -1021,9 +983,9 @@ function SearchErrorStates({
 					<p className="text-xs text-gray-500 dark:text-ios-400 mt-1">
 						The server could not complete the search. Try again shortly.
 					</p>
-				</motion.div>
+				</div>
 			)}
-		</AnimatePresence>
+		</>
 	);
 }
 
@@ -1094,13 +1056,10 @@ function SuggestionsSection({
 
 	return (
 		<>
-			<AnimatePresence initial={false}>
+			<>
 				{showButton && (
-					<motion.div
+					<div
 						key="discover-button"
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
 					>
 						<button
 							type="button"
@@ -1121,29 +1080,24 @@ function SuggestionsSection({
 								</>
 							)}
 						</button>
-					</motion.div>
+					</div>
 				)}
-			</AnimatePresence>
+			</>
 
-			<AnimatePresence initial={false}>
+			<>
 				{state.phase === "loading" && (
-					<motion.section
+					<section
 						key="discover-loading"
 						data-testid="discover-loading"
 						role="status"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
 						className="space-y-3"
 					>
 						<div className="flex items-center gap-2 text-sm text-gray-500 dark:text-ios-400">
-							<motion.span
+							<span
 								className="inline-flex"
-								animate={{ rotate: 360 }}
-								transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
 							>
 								<Loader2 className="w-4 h-4 text-red-600" />
-							</motion.span>
+							</span>
 							Discovering channels…
 						</div>
 						<div className="space-y-2 pr-1">
@@ -1157,30 +1111,20 @@ function SuggestionsSection({
 										<div className="h-4 w-3/4 bg-gray-200 dark:bg-ios-700 rounded" />
 										<div className="h-3 w-1/2 bg-gray-200 dark:bg-ios-700 rounded" />
 									</div>
-									<motion.div
+									<div
 										aria-hidden="true"
 										className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent dark:via-white/10"
-										animate={{ x: ["-100%", "100%"] }}
-										transition={{
-											repeat: Infinity,
-											duration: 1.4,
-											ease: "easeInOut",
-											delay: i * 0.15,
-										}}
 									/>
 								</div>
 							))}
 						</div>
-					</motion.section>
+					</section>
 				)}
-			</AnimatePresence>
+			</>
 
-			<AnimatePresence initial={false}>
+			<>
 				{state.phase === "error" && (
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
+					<div
 						className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/30"
 					>
 						<div className="flex items-start gap-3">
@@ -1205,17 +1149,14 @@ function SuggestionsSection({
 								)}
 							</div>
 						</div>
-					</motion.div>
+					</div>
 				)}
-			</AnimatePresence>
+			</>
 
-			<AnimatePresence initial={false}>
+			<>
 				{state.phase === "results" && state.channels.length > 0 && (
-					<motion.div
+					<div
 						key="discover-results"
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
 					>
 						<div className="mb-2 flex items-center justify-between">
 							<p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-ios-400">
@@ -1244,16 +1185,13 @@ function SuggestionsSection({
 								/>
 							)}
 						/>
-					</motion.div>
+					</div>
 				)}
-			</AnimatePresence>
+			</>
 
-			<AnimatePresence initial={false}>
+			<>
 				{state.phase === "results" && state.channels.length === 0 && (
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
+					<div
 						className="rounded-xl border border-gray-200 dark:border-ios-800 px-4 py-4 text-center"
 					>
 						<p className="text-sm text-gray-500 dark:text-ios-400 mb-3">
@@ -1276,9 +1214,9 @@ function SuggestionsSection({
 								Try again
 							</button>
 						</div>
-					</motion.div>
+					</div>
 				)}
-			</AnimatePresence>
+			</>
 		</>
 	);
 }
@@ -1287,10 +1225,7 @@ function SupportedFormatsSection() {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, y: 10 }}
+		<section
 			className="rounded-xl border border-gray-100 dark:border-ios-800 bg-gray-50 dark:bg-ios-800/30 p-4 space-y-3"
 		>
 			<button
@@ -1326,6 +1261,6 @@ function SupportedFormatsSection() {
 					))}
 				</div>
 			)}
-		</motion.section>
+		</section>
 	);
 }

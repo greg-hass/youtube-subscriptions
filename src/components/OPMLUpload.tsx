@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, CheckCircle, XCircle, Loader2, ExternalLink } from 'lucide-react';
 import { useSubscriptionStorage } from '../hooks/useSubscriptionStorage';
 import { parseSubscriptionImportPreview, type ImportFormat } from '../lib/opml-parser';
@@ -210,9 +209,7 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
           onChange={handleFileInput}
           className="hidden"
         />
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={handleClick}
           disabled={isImporting}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -223,7 +220,7 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
             <Upload className="w-4 h-4" />
           )}
           <span className={showLabelOnMobile ? '' : 'hidden sm:inline'}>Import</span>
-        </motion.button>
+        </button>
         {uploadStatus === 'review' && pendingImport && (
           <ImportReview
             pendingImport={pendingImport}
@@ -255,9 +252,7 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
   // Full upload screen version
   return (
     <div className="app-shell min-h-screen flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className="max-w-2xl w-full"
       >
         <div className="text-center mb-8">
@@ -272,13 +267,10 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
           </p>
         </div>
 
-        <AnimatePresence mode="wait">
+        <>
           {uploadStatus === 'idle' && (
-            <motion.div
+            <div
               key="upload"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
             >
               <input
                 ref={fileInputRef}
@@ -324,15 +316,12 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
                   <li>Download the export and upload subscriptions.csv from the subscriptions folder</li>
                 </ol>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {uploadStatus === 'review' && pendingImport && (
-            <motion.div
+            <div
               key="review"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
             >
               <ImportReview
                 pendingImport={pendingImport}
@@ -340,15 +329,12 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
                 onCancel={cancelImport}
                 isImporting={isImporting}
               />
-            </motion.div>
+            </div>
           )}
 
           {uploadStatus === 'processing' && (
-            <motion.div
+            <div
               key="processing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               className="text-center py-12"
             >
               <Loader2 className="w-16 h-16 text-red-600 animate-spin mx-auto mb-4" />
@@ -356,15 +342,12 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
               <p className="text-gray-600 dark:text-ios-400">
                 This may take a moment
               </p>
-            </motion.div>
+            </div>
           )}
 
           {uploadStatus === 'success' && (
-            <motion.div
+            <div
               key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
               className="text-center py-12"
             >
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -380,15 +363,12 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
               >
                 Import More
               </button>
-            </motion.div>
+            </div>
           )}
 
           {uploadStatus === 'error' && (
-            <motion.div
+            <div
               key="error"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
               className="text-center py-12"
             >
               <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -402,10 +382,10 @@ export const OPMLUpload = ({ onSuccess, minimal = false, showLabelOnMobile = fal
               >
                 Try Again
               </button>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </>
+      </div>
     </div>
   );
 };

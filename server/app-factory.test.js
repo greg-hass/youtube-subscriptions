@@ -42,6 +42,7 @@ function buildAppStore(databaseFile) {
 		init: store.init,
 		readData: store.readData,
 		readVideoCache: store.readVideoCache,
+		readVideoCacheStatus: store.readVideoCacheStatus,
 		updateData: store.updateData,
 		updateSubscriptionField: store.updateSubscriptionField,
 		writeData: store.writeData,
@@ -549,6 +550,21 @@ describe("createApp integration", () => {
 		expect(response.status).toBe(200);
 		expect(response.body.rateLimitBuckets).toBeDefined();
 		expect(response.body.searchCache).toBeDefined();
+	});
+
+	it("reports the stored cache version after backfill and reset without reading videos", async () => {
+		const readVideos = vi.spyOn(resources.appStore, "readVideoCache");
+		for (const lastUpdated of ["2026-09-01T12:00:00.000Z", "2026-09-01T12:05:00.000Z", null]) {
+			await resources.appStore.writeVideoCache({
+				...resources.appStore.DEFAULT_VIDEO_CACHE,
+				lastUpdated,
+			});
+			const response = await authedRequest(resources.app).get("/api/videos/status");
+			expect(response.status).toBe(200);
+			expect(response.body.cacheUpdatedAt).toBe(lastUpdated);
+			expect(response.body.lastUpdated).toBeNull();
+		}
+		expect(readVideos).not.toHaveBeenCalled();
 	});
 
 	it("GET /api/videos/status includes activeChannels from the aggregator", async () => {

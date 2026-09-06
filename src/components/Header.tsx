@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useState } from "react";
 import { DesktopControls } from "./DesktopControls";
 import { HeaderSearchDesktop } from "./HeaderSearchDesktop";
@@ -117,8 +116,7 @@ export const Header = ({
 				<div className="max-w-7xl mx-auto px-4">
 					<div className="flex h-[var(--app-header-height)] items-center justify-between gap-3 xl:gap-4">
 						{/* Logo */}
-						<motion.div
-							whileHover={{ scale: 1.05 }}
+						<div
 							className="flex items-center gap-3"
 						>
 							<img
@@ -141,7 +139,7 @@ export const Header = ({
 									<p>{count} channels</p>
 								</div>
 							</div>
-						</motion.div>
+						</div>
 
 						{!minimal && (
 							<HeaderSearchDesktop
@@ -233,10 +231,9 @@ export const Header = ({
 				refreshProgress={refreshProgress}
 			/>
 
-			<SettingsModal
-				isOpen={isSettingsOpen}
-				onClose={() => setIsSettingsOpen(false)}
-			/>
+			{isSettingsOpen && (
+				<SettingsModal isOpen onClose={() => setIsSettingsOpen(false)} />
+			)}
 		</>
 	);
 };

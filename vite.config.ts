@@ -45,6 +45,7 @@ export const pwaRuntimeCaching = [
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [
+		{ name: "build-identity", transformIndexHtml: () => [{ tag: "meta", attrs: { name: "mytube-build-id", content: process.env.BUILD_ID || "development" }, injectTo: "head" }] },
 		react(),
 		// Gzip compression
 		viteCompression({
@@ -113,8 +114,6 @@ export default defineConfig({
 					if (id.includes("node_modules/react/")) return "react-vendor";
 					if (id.includes("node_modules/react-dom/")) return "react-vendor";
 					if (id.includes("node_modules/@tanstack/")) return "query-vendor";
-					if (id.includes("node_modules/framer-motion"))
-						return "animation-vendor";
 					if (
 						id.includes("node_modules/lucide-react") ||
 						id.includes("node_modules/zustand")
@@ -156,7 +155,6 @@ export default defineConfig({
 			"react",
 			"react-dom",
 			"@tanstack/react-query",
-			"framer-motion",
 			"zustand",
 			"lucide-react",
 		],

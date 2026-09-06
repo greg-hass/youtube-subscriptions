@@ -1,0 +1,163 @@
+{
+  "fixture": {
+    "channels": 200,
+    "videos": 3000,
+    "favorites": 500,
+    "progress": 1000,
+    "cpuThrottle": 4,
+    "viewport": "1440x900"
+  },
+  "results": [
+    {
+      "run": 1,
+      "loadMs": 862.540792,
+      "initial": {
+        "scriptMs": 275.10400000000004,
+        "taskMs": 575.72,
+        "reads": 402,
+        "bytesRead": 35302402,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 23.19199999999999,
+        "taskMs": 101.59699999999994,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 94.77399999999997,
+        "taskMs": 324.894,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      },
+      "idle12s": {
+        "feedRequests": 0,
+        "statusRequests": 2,
+        "feedBytes": 0,
+        "scriptMs": 8.873000000000019,
+        "taskMs": 81.79599999999998,
+        "storageReads": 0,
+        "storageBytesRead": 0,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 2,
+      "loadMs": 539.6209169999984,
+      "initial": {
+        "scriptMs": 206.346,
+        "taskMs": 403.06399999999996,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 21.43600000000001,
+        "taskMs": 92.07300000000002,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 95.68999999999997,
+        "taskMs": 312.447,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 3,
+      "loadMs": 557.5981250000004,
+      "initial": {
+        "scriptMs": 219.61,
+        "taskMs": 426.091,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 20.829000000000015,
+        "taskMs": 90.06700000000001,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 90.56399999999998,
+        "taskMs": 306.426,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 4,
+      "loadMs": 547.2578749999975,
+      "initial": {
+        "scriptMs": 211.62900000000002,
+        "taskMs": 416.176,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 21.731,
+        "taskMs": 88.98499999999999,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 95.01399999999998,
+        "taskMs": 315.623,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 5,
+      "loadMs": 540.8365000000013,
+      "initial": {
+        "scriptMs": 204.016,
+        "taskMs": 408.10400000000004,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 20.982,
+        "taskMs": 83.06700000000001,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 92.33699999999997,
+        "taskMs": 315.122,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    }
+  ]
+}

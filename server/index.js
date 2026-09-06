@@ -5,7 +5,8 @@ const path = require("path");
 // Load .env from the project root for local dev. In production (Docker),
 // env vars are injected by docker-compose — existing values are NOT overridden.
 (function loadEnv() {
-	const envPath = path.join(__dirname, "..", ".env");
+	if (process.env.MYTUBE_ENV_FILE === "") return;
+	const envPath = process.env.MYTUBE_ENV_FILE || path.join(__dirname, "..", ".env");
 	try {
 		const content = fs.readFileSync(envPath, "utf8");
 		for (const line of content.split("\n")) {
@@ -143,8 +144,9 @@ init()
 				channelBackfillService,
 			},
 		});
-		server = app.listen(PORT, () => {
-			console.log(`Sync server running on port ${PORT}`);
+		server = app.listen(PORT, process.env.SERVER_HOST, () => {
+			console.log(`Sync server running on port ${server.address().port}`);
+			process.send?.({ port: server.address().port });
 		});
 	})
 	.catch((error) => {

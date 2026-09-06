@@ -70,10 +70,7 @@ import {
 	writeSubscriptionGroups,
 	SUBSCRIPTION_GROUPS_CHANGED_EVENT,
 } from "../lib/subscription-groups";
-import {
-	getVideoIdsOlderThan,
-	getVisibleVideoIds,
-} from "../lib/feed-bulk-actions";
+import { getVideoIdsOlderThan } from "../lib/feed-bulk-actions";
 import {
 	getVisibleTimelineVideos,
 	MOBILE_TIMELINE_INCREMENT,
@@ -1300,7 +1297,7 @@ export const Dashboard = () => {
 
 	const handleBulkWatchedAction = (action: string) => {
 		if (action === "shown") {
-			markVideosWatched(getVisibleVideoIds(visibleLatestVideos));
+			markVideosWatched(visibleLatestVideos.map((video) => video.id));
 			return;
 		}
 
@@ -2520,9 +2517,9 @@ export const Dashboard = () => {
 			/>
 
 			{/* Settings modal for the auth-required flow */}
-			{needsServerAuth && (
+			{needsServerAuth && isAuthSettingsOpen && (
 				<SettingsModal
-					isOpen={isAuthSettingsOpen}
+					isOpen
 					onClose={() => {
 						setIsAuthSettingsOpen(false);
 						if (getServerApiToken()) void clearServerAuth();

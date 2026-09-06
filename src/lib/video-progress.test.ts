@@ -1,14 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	clearVideoProgress,
-	getAllVideoProgress,
 	getVideoProgress,
 	getVideoProgressPercent,
-	markVideoProgressRemoved,
 	saveVideoProgress,
 } from "./video-progress";
 
 describe("video progress storage", () => {
+	afterEach(() => vi.restoreAllMocks());
 	beforeEach(() => {
 		const storage = new Map<string, string>();
 		vi.stubGlobal("localStorage", {
@@ -27,6 +26,31 @@ describe("video progress storage", () => {
 			duration: 120,
 		});
 		expect(getVideoProgressPercent("video-1")).toBe(37.5);
+	});
+
+	it("reuses decoded history until storage changes, including writes from another tab", () => {
+		localStorage.setItem("video-playback-progress", JSON.stringify({
+			"video-1": { currentTime: 30, duration: 120, updatedAt: 1 },
+		}));
+		const parse = vi.spyOn(JSON, "parse");
+		for (let index = 0; index < 20; index++) {
+			expect(getVideoProgressPercent("video-1")).toBe(25);
+		}
+		expect(parse).toHaveBeenCalledTimes(1);
+		localStorage.setItem("video-playback-progress", JSON.stringify({
+			"video-1": { currentTime: 60, duration: 120, updatedAt: 2 },
+		}));
+		expect(getVideoProgressPercent("video-1")).toBe(50);
+		expect(parse).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not change cached progress when persistence fails", () => {
+		saveVideoProgress("video-1", 30, 120);
+		vi.mocked(localStorage.setItem).mockImplementation(() => { throw new Error("Storage full"); });
+		expect(() => saveVideoProgress("video-1", 60, 120)).toThrow("Storage full");
+		expect(getVideoProgress("video-1")?.currentTime).toBe(30);
+		expect(() => clearVideoProgress("video-1")).toThrow("Storage full");
+		expect(getVideoProgress("video-1")?.currentTime).toBe(30);
 	});
 
 	it("keeps progress until playback reports that the video ended", () => {
@@ -49,34 +73,20 @@ describe("video progress storage", () => {
 		expect(getVideoProgress("video-2")).toMatchObject({ currentTime: 20 });
 	});
 
-	it("markVideoProgressRemoved sets a removedAt timestamp but keeps progress", () => {
-		saveVideoProgress("video-1", 45, 120);
-
-		markVideoProgressRemoved("video-1");
-
-		const stored = getAllVideoProgress()["video-1"];
-		expect(stored.removedAt).toEqual(expect.any(Number));
-		expect(stored.currentTime).toBe(45);
-	});
-
-	it("markVideoProgressRemoved is a no-op when there is no progress entry", () => {
-		// Don't throw, don't write anything.
-		markVideoProgressRemoved("missing");
-
-		expect(getAllVideoProgress()["missing"]).toBeUndefined();
-	});
-
-	it("saveVideoProgress clears the removedAt flag so re-engagement brings the video back", () => {
-		saveVideoProgress("video-1", 30, 120);
-		markVideoProgressRemoved("video-1");
-		expect(getAllVideoProgress()["video-1"].removedAt).toEqual(
-			expect.any(Number),
+	it("resumes legacy progress records and clears their removal flag", () => {
+		localStorage.setItem(
+			"video-playback-progress",
+			JSON.stringify({
+				"video-1": { currentTime: 30, duration: 120, updatedAt: 1, removedAt: 2 },
+			}),
 		);
-
-		// Simulate resuming the same video later from Latest.
+		expect(getVideoProgress("video-1")).toMatchObject({
+			currentTime: 30,
+			removedAt: 2,
+		});
 		saveVideoProgress("video-1", 45, 120);
 
-		expect(getAllVideoProgress()["video-1"].removedAt).toBeUndefined();
-		expect(getAllVideoProgress()["video-1"].currentTime).toBe(45);
+		expect(getVideoProgress("video-1")!.removedAt).toBeUndefined();
+		expect(getVideoProgress("video-1")!.currentTime).toBe(45);
 	});
 });

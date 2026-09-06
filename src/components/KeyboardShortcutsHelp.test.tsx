@@ -1,27 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ReactNode } from 'react';
 import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
-
-vi.mock('framer-motion', () => ({
-  AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
-  motion: {
-    div: ({
-      animate,
-      children,
-      exit,
-      initial,
-      transition,
-      ...props
-    }: any) => {
-      void animate;
-      void exit;
-      void initial;
-      void transition;
-      return <div {...props}>{children}</div>;
-    },
-  },
-}));
 
 afterEach(() => {
   vi.clearAllMocks();

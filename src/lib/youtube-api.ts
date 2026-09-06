@@ -1,12 +1,8 @@
 import type { YouTubeChannel } from '../types/youtube';
 import type { ParsedChannelInput } from './youtube-parser';
 import { useStore } from '../store/useStore';
-import { scrapeChannelId, fetchChannelInfoFallback } from './scrapers';
+import { scrapeChannelId } from './scrapers';
 import { resolveWithFallbackApi } from './fallback-api';
-import { handleError } from './error-handler';
-
-// Re-export fetchChannelInfoFallback for backward compatibility if needed
-export { fetchChannelInfoFallback };
 
 /**
  * YouTube API configuration
@@ -34,18 +30,6 @@ type ApiChannelItem = {
   statistics?: {
     subscriberCount?: string;
     videoCount?: string;
-  };
-};
-
-type ApiPlaylistItem = {
-  contentDetails: { videoId: string };
-  snippet: {
-    title: string;
-    channelId: string;
-    channelTitle: string;
-    publishedAt: string;
-    description?: string;
-    thumbnails: ApiThumbnailSet;
   };
 };
 
@@ -115,7 +99,7 @@ export async function fetchChannelInfo(
       videoCount: channel.statistics?.videoCount,
     };
   } catch (error) {
-    handleError(error, { context: 'Fetching channel info', showToast: false });
+    console.error('Fetching channel info', error);
     return null;
   }
 }
@@ -234,84 +218,6 @@ export async function fetchChannelIconsBatch(
 }
 
 /**
- * Fetch latest videos for a list of channels using the YouTube Data API
- * This bypasses RSS limitations and provides more reliable data
- */
-export async function fetchVideosForChannelsAPI(
-  channelIds: string[],
-  apiKey: string
-): Promise<import('../types/youtube').YouTubeVideo[]> {
-  if (channelIds.length === 0) return [];
-
-  // Check if API is enabled
-  const useApi = useStore.getState().useApiForVideos;
-  if (!useApi) {
-    return [];
-  }
-
-  // We can't batch fetch videos from different playlists in one request
-  // So we have to make parallel requests for each channel
-  // We'll limit concurrency to avoid hitting rate limits too hard
-
-  const results: import('../types/youtube').YouTubeVideo[] = [];
-
-  // Process channels with controlled concurrency (10 at a time)
-  // This balances speed with browser connection limits and API rate limits
-  const CONCURRENCY_LIMIT = 10;
-
-  for (let i = 0; i < channelIds.length; i += CONCURRENCY_LIMIT) {
-    const batch = channelIds.slice(i, i + CONCURRENCY_LIMIT);
-
-    const promises = batch.map(async (channelId) => {
-      try {
-        // Construct uploads playlist ID (replace UC with UU)
-        // This is a standard YouTube pattern that saves us an API call to look up the ID
-        const playlistId = channelId.startsWith('UC')
-          ? 'UU' + channelId.substring(2)
-          : channelId; // Fallback if it doesn't start with UC (unlikely for valid IDs)
-
-        const response = await fetch(
-          `${YOUTUBE_API_BASE}/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=10&key=${apiKey}`
-        );
-        useStore.getState().incrementQuota(1);
-
-        if (!response.ok) {
-          // If 404, the channel might not have any videos or the UU trick didn't work
-          // We'll just ignore it for now to keep things moving
-          return [];
-        }
-
-        const data = await response.json() as { items?: ApiPlaylistItem[] };
-
-        if (!data.items) return [];
-
-        return data.items.map((item) => ({
-          id: item.contentDetails.videoId,
-          title: item.snippet.title,
-          channelId: item.snippet.channelId,
-          channelTitle: item.snippet.channelTitle,
-          publishedAt: item.snippet.publishedAt,
-          thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url || '',
-          description: item.snippet.description || '',
-        }));
-      } catch (error) {
-        console.error(`Error fetching videos for channel ${channelId}:`, error);
-        return [];
-      }
-    });
-
-    const videosArrays = await Promise.all(promises);
-
-    // Flatten results from this batch
-    videosArrays.forEach(videos => {
-      results.push(...videos);
-    });
-  }
-
-  return results;
-}
-
-/**
  * Resolve handle or custom URL to channel ID
  */
 async function resolveChannelId(
@@ -403,17 +309,6 @@ async function resolveChannelId(
     console.error('Error resolving channel ID:', error);
     return null;
   }
-}
-
-/**
- * Fetch channel info without spending YouTube API quota.
- * Handle resolution has a separate capped automatic API path in resolveTemporaryChannelFromRSS.
- */
-export async function fetchChannelInfoWithFallback(
-  parsedInput: ParsedChannelInput,
-  _apiKey?: string
-): Promise<YouTubeChannel | null> {
-  return fetchChannelInfoFallback(parsedInput);
 }
 
 /**

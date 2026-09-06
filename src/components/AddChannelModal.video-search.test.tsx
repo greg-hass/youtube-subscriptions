@@ -1,22 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ReactNode } from "react";
 import { AddChannelModal } from "./AddChannelModal";
-
-vi.mock("framer-motion", () => ({
-	AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
-	motion: {
-		div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-		span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-		section: ({ children, ...props }: any) => (
-			<section {...props}>{children}</section>
-		),
-	},
-}));
-
-vi.mock("../lib/youtube-api", () => ({
-	fetchChannelInfoWithFallback: vi.fn(() => Promise.resolve(null)),
-}));
 
 const VIDEO_CHANNEL = {
 	id: "UCvideochannel99999999999",

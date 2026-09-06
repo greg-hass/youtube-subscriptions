@@ -1,0 +1,163 @@
+{
+  "fixture": {
+    "channels": 200,
+    "videos": 3000,
+    "favorites": 500,
+    "progress": 1000,
+    "cpuThrottle": 4,
+    "viewport": "1440x900"
+  },
+  "results": [
+    {
+      "run": 1,
+      "loadMs": 1220.436667,
+      "initial": {
+        "scriptMs": 605.9409999999999,
+        "taskMs": 836.481,
+        "reads": 438,
+        "bytesRead": 38647558,
+        "parses": 230,
+        "bytesParsed": 19319990
+      },
+      "favorite": {
+        "scriptMs": 437.36600000000004,
+        "taskMs": 633.362,
+        "storageReads": 548,
+        "storageBytesRead": 48806088,
+        "jsonParses": 216,
+        "jsonBytesParsed": 18004861
+      },
+      "search": {
+        "scriptMs": 294.2169999999999,
+        "taskMs": 506.3310000000001,
+        "storageReads": 224,
+        "storageBytesRead": 19632404,
+        "jsonParses": 124,
+        "jsonBytesParsed": 10358554
+      },
+      "idle12s": {
+        "feedRequests": 1,
+        "statusRequests": 2,
+        "feedBytes": 1070222,
+        "scriptMs": 58.90799999999996,
+        "taskMs": 136.97000000000025,
+        "storageReads": 102,
+        "storageBytesRead": 8952207,
+        "jsonParses": 36,
+        "jsonBytesParsed": 2831466
+      }
+    },
+    {
+      "run": 2,
+      "loadMs": 989.5332500000004,
+      "initial": {
+        "scriptMs": 496.88500000000005,
+        "taskMs": 695.246,
+        "reads": 332,
+        "bytesRead": 29310892,
+        "parses": 190,
+        "bytesParsed": 16116110
+      },
+      "favorite": {
+        "scriptMs": 447.6209999999999,
+        "taskMs": 684.005,
+        "storageReads": 548,
+        "storageBytesRead": 48818863,
+        "jsonParses": 216,
+        "jsonBytesParsed": 18005591
+      },
+      "search": {
+        "scriptMs": 299.2990000000001,
+        "taskMs": 517.9309999999999,
+        "storageReads": 224,
+        "storageBytesRead": 19632404,
+        "jsonParses": 124,
+        "jsonBytesParsed": 10358554
+      }
+    },
+    {
+      "run": 3,
+      "loadMs": 926.0075419999994,
+      "initial": {
+        "scriptMs": 564.422,
+        "taskMs": 789.413,
+        "reads": 438,
+        "bytesRead": 38647558,
+        "parses": 230,
+        "bytesParsed": 19319990
+      },
+      "favorite": {
+        "scriptMs": 376.607,
+        "taskMs": 562.5999999999999,
+        "storageReads": 446,
+        "storageBytesRead": 39866656,
+        "jsonParses": 180,
+        "jsonBytesParsed": 15174125
+      },
+      "search": {
+        "scriptMs": 302.30999999999995,
+        "taskMs": 518.445,
+        "storageReads": 224,
+        "storageBytesRead": 19632404,
+        "jsonParses": 124,
+        "jsonBytesParsed": 10358554
+      }
+    },
+    {
+      "run": 4,
+      "loadMs": 961.3233340000006,
+      "initial": {
+        "scriptMs": 566.511,
+        "taskMs": 778.125,
+        "reads": 438,
+        "bytesRead": 38647558,
+        "parses": 230,
+        "bytesParsed": 19319990
+      },
+      "favorite": {
+        "scriptMs": 441.962,
+        "taskMs": 635.969,
+        "storageReads": 548,
+        "storageBytesRead": 48806088,
+        "jsonParses": 216,
+        "jsonBytesParsed": 18004861
+      },
+      "search": {
+        "scriptMs": 296.0400000000001,
+        "taskMs": 508.9509999999999,
+        "storageReads": 224,
+        "storageBytesRead": 19632404,
+        "jsonParses": 124,
+        "jsonBytesParsed": 10358554
+      }
+    },
+    {
+      "run": 5,
+      "loadMs": 928.5802499999991,
+      "initial": {
+        "scriptMs": 563.288,
+        "taskMs": 779.8439999999999,
+        "reads": 438,
+        "bytesRead": 38647558,
+        "parses": 230,
+        "bytesParsed": 19319990
+      },
+      "favorite": {
+        "scriptMs": 319.716,
+        "taskMs": 454.472,
+        "storageReads": 340,
+        "storageBytesRead": 30530355,
+        "jsonParses": 140,
+        "jsonBytesParsed": 11970245
+      },
+      "search": {
+        "scriptMs": 309.9280000000001,
+        "taskMs": 533.5840000000001,
+        "storageReads": 224,
+        "storageBytesRead": 19632404,
+        "jsonParses": 124,
+        "jsonBytesParsed": 10358554
+      }
+    }
+  ]
+}

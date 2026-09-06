@@ -4,31 +4,36 @@ export interface VideoProgress {
 	currentTime: number;
 	duration: number;
 	updatedAt: number;
-	// User explicitly removed this video from Continue Watching.
-	// Auto-clears via saveVideoProgress the next time the user starts a
-	// session from Latest (a deliberate re-engagement). The Dashboard
-	// applies its own grace window for storage-cleanup scenarios.
+	// Retained for progress records saved by the former Continue Watching view.
 	removedAt?: number;
 }
 
 type VideoProgressStore = Record<string, VideoProgress>;
+let cachedRaw: string | null | undefined;
+let cachedStore: VideoProgressStore = {};
 
 function readProgressStore(): VideoProgressStore {
 	try {
 		const rawValue = localStorage.getItem(STORAGE_KEY);
+		if (rawValue === cachedRaw) return cachedStore;
 		const parsedValue = rawValue ? JSON.parse(rawValue) : {};
-		return parsedValue &&
+		cachedStore = parsedValue &&
 			typeof parsedValue === "object" &&
 			!Array.isArray(parsedValue)
 			? parsedValue
 			: {};
+		cachedRaw = rawValue;
+		return cachedStore;
 	} catch {
 		return {};
 	}
 }
 
 function writeProgressStore(store: VideoProgressStore) {
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+	const rawValue = JSON.stringify(store);
+	localStorage.setItem(STORAGE_KEY, rawValue);
+	cachedRaw = rawValue;
+	cachedStore = store;
 	window.dispatchEvent(new Event("video-progress-changed"));
 }
 
@@ -47,10 +52,6 @@ export function getVideoProgress(videoId: string): VideoProgress | null {
 	return progress;
 }
 
-export function getAllVideoProgress(): VideoProgressStore {
-	return readProgressStore();
-}
-
 export function getVideoProgressPercent(videoId: string): number {
 	const progress = getVideoProgress(videoId);
 	if (!progress) return 0;
@@ -62,21 +63,8 @@ export function getVideoProgressPercent(videoId: string): number {
 }
 
 export function clearVideoProgress(videoId: string) {
-	const store = readProgressStore();
+	const store = { ...readProgressStore() };
 	delete store[videoId];
-	writeProgressStore(store);
-}
-
-// Marks a video as user-removed from Continue Watching. Keeps the progress
-// data intact so we can still compute "you watched 12 minutes of this" for
-// any UI that wants to show it, but the Dashboard will skip it until the
-// user re-engages from Latest (which writes a fresh progress entry and
-// drops the flag).
-export function markVideoProgressRemoved(videoId: string) {
-	const store = readProgressStore();
-	const existing = store[videoId];
-	if (!existing) return;
-	store[videoId] = { ...existing, removedAt: Date.now() };
 	writeProgressStore(store);
 }
 
@@ -92,14 +80,11 @@ export function saveVideoProgress(
 	)
 		return;
 
-	const store = readProgressStore();
+	const store = { ...readProgressStore() };
 	store[videoId] = {
 		currentTime: Math.max(0, currentTime),
 		duration,
 		updatedAt: Date.now(),
-		// Re-engaging with a previously-removed video clears the flag, so it
-		// reappears in Continue Watching on the next Dashboard render.
-		removedAt: undefined,
 	};
 	writeProgressStore(store);
 }

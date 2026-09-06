@@ -21,13 +21,6 @@ vi.mock('../hooks/useFavoriteVideos', () => ({
     }),
 }));
 
-vi.mock('../hooks/useQueuedVideos', () => ({
-    useQueuedVideos: () => ({
-        isQueuedVideo: () => false,
-        toggleQueuedVideo: vi.fn(),
-    }),
-}));
-
 const videos: YouTubeVideo[] = [
     {
         id: 'video-1',

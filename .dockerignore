@@ -22,3 +22,8 @@ src/debug-channel-test.js
 src/test-channel-fix.js
 docs/
 # Force rebuild Tue Nov 25 18:45:58 GMT 2025
+
+output
+.playwright-profile
+.worktrees
+playwright-report

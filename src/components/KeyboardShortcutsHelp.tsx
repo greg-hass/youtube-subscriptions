@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Command, Keyboard } from 'lucide-react';
 import { useModalFocus } from '../hooks/useModalFocus';
 
@@ -20,29 +19,23 @@ export const KeyboardShortcutsHelp = ({ isOpen, onClose }: KeyboardShortcutsHelp
     const modifierKey = isMac ? '⌘' : 'Ctrl';
 
     return (
-        <AnimatePresence>
+        <>
             {isOpen && (
                 <>
                     {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                    <div
                         onClick={onClose}
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
                     />
 
                     {/* Modal */}
-                    <motion.div
+                    <div
                         ref={modalRef}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="keyboard-shortcuts-title"
                         tabIndex={-1}
                         onKeyDown={onKeyDown}
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
                     >
                         <div className="bg-white dark:bg-ios-900 rounded-2xl shadow-xl border border-gray-200 dark:border-ios-800 overflow-hidden m-4">
@@ -96,9 +89,9 @@ export const KeyboardShortcutsHelp = ({ isOpen, onClose }: KeyboardShortcutsHelp
                                 </p>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 </>
             )}
-        </AnimatePresence>
+        </>
     );
 };

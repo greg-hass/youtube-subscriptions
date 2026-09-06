@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useFavoriteVideos } from './useFavoriteVideos';
 import type { YouTubeVideo } from '../types/youtube';
 
@@ -28,6 +28,7 @@ function FavoriteHarness() {
 }
 
 describe('useFavoriteVideos', () => {
+  afterEach(() => vi.restoreAllMocks());
   beforeEach(() => {
     const storage = new Map<string, string>();
     vi.stubGlobal('localStorage', {
@@ -52,5 +53,27 @@ describe('useFavoriteVideos', () => {
         title: 'A favorite from Latest',
       },
     ]);
+  });
+
+  it('shares decoded favorites across consumers and refreshes after external storage updates', () => {
+    localStorage.setItem('favorite-videos', JSON.stringify([video, video]));
+    const first = renderHook(() => useFavoriteVideos());
+    const second = renderHook(() => useFavoriteVideos());
+    expect(first.result.current.favoriteVideos).toHaveLength(1);
+    expect(second.result.current.favoriteVideos).toBe(first.result.current.favoriteVideos);
+
+    act(() => {
+      localStorage.setItem('favorite-videos', JSON.stringify([{ ...video, title: 'Restored title' }]));
+      window.dispatchEvent(new Event('favorite-videos-changed'));
+    });
+    expect(first.result.current.favoriteVideos[0].title).toBe('Restored title');
+    expect(second.result.current.favoriteVideos).toBe(first.result.current.favoriteVideos);
+
+    act(() => {
+      localStorage.clear();
+      window.dispatchEvent(new StorageEvent('storage'));
+    });
+    expect(first.result.current.favoriteVideoIds.size).toBe(0);
+    expect(second.result.current.favoriteVideos).toEqual([]);
   });
 });

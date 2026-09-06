@@ -2,25 +2,6 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Header } from "./Header";
 
-vi.mock("framer-motion", () => ({
-	motion: {
-		header: ({ animate, children, initial, ...props }: any) => {
-			void animate;
-			void initial;
-			return <header {...props}>{children}</header>;
-		},
-		div: ({ children, whileHover, ...props }: any) => {
-			void whileHover;
-			return <div {...props}>{children}</div>;
-		},
-		button: ({ children, whileHover, whileTap, ...props }: any) => {
-			void whileHover;
-			void whileTap;
-			return <button {...props}>{children}</button>;
-		},
-	},
-}));
-
 vi.mock("../store/useStore", () => ({
 	useStore: () => ({
 		theme: "dark",

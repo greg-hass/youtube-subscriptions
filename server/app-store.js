@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { createSqliteStore } = require('./sqlite-store');
 
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.MYTUBE_DATA_DIR || path.join(__dirname, 'data');
 const DEFAULT_DATA_FILE = path.join(DATA_DIR, 'db.json');
 const DEFAULT_VIDEOS_FILE = path.join(DATA_DIR, 'videos.json');
 const DEFAULT_DATABASE_FILE = path.join(DATA_DIR, 'mytube.sqlite');
@@ -59,6 +59,7 @@ module.exports = {
     init,
     readData: (...args) => withStore('readData', ...args),
     readVideoCache: (...args) => withStore('readVideoCache', ...args),
+    readVideoCacheStatus: () => withStore('readVideoCacheStatus'),
     updateData: (...args) => withStore('updateData', ...args),
     updateSubscriptionField: (...args) => withStore('updateSubscriptionField', ...args),
     writeData: (...args) => withStore('writeData', ...args),

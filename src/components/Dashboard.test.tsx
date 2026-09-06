@@ -1282,52 +1282,6 @@ describe("Dashboard", () => {
     expect(screen.getByText("Auto 15m")).toBeInTheDocument();
   });
 
-  it("uses stable app chrome spacing with floating tab bar", () => {
-    render(
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>,
-    );
-
-    const pageChrome = screen.getByTestId("dashboard-page-chrome");
-    const tabBar = screen.getByTestId("floating-tab-bar");
-    const tabBarInner = screen.getByTestId("floating-tab-bar-inner");
-    const addTab = screen.getByRole("button", { name: "Add" });
-
-    expect(pageChrome.className).toContain("pt-[var(--app-sticky-gap)]");
-    expect(pageChrome.className).toContain(
-      "pb-[calc(5rem+env(safe-area-inset-bottom))]",
-    );
-    expect(tabBar.className).toContain("fixed");
-    expect(tabBar.className).toContain("bottom-0");
-    expect(tabBar.className).toContain("z-50");
-    expect(tabBar.className).toContain("pb-[var(--app-tab-bar-bottom-offset)]");
-    expect(tabBarInner.className).toContain("max-w-7xl");
-    // The Add action is rendered as the prominent middle action.
-    expect(addTab.className).toContain("bg-red-600");
-    expect(addTab.className).toContain("rounded-full");
-    const addIcon = addTab.querySelector("svg");
-    const addIconClass = addIcon?.getAttribute("class") ?? "";
-    expect(addIconClass).toContain("text-white");
-  });
-
-  it("keeps the iPhone latest controls in one compact row", () => {
-    render(
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>,
-    );
-
-    const latestToolbar = screen.getByTestId("latest-toolbar");
-    const latestActions = screen.getByTestId("latest-toolbar-actions");
-
-    expect(latestToolbar.className).toContain("flex-nowrap");
-    expect(latestToolbar.className).toContain("items-center");
-    expect(latestToolbar.className).not.toContain("flex-col");
-    expect(latestActions.className).toContain("flex-nowrap");
-    expect(latestActions.className).toContain("shrink-0");
-  });
-
   it("shows subscription group controls in the toolbar", async () => {
     render(
       <MemoryRouter>

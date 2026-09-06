@@ -47,7 +47,7 @@ function statusResponse(overrides: Record<string, unknown> = {}) {
 
 function videosResponse(
 	videos: unknown[],
-	lastUpdated: string,
+	lastUpdated: string | null,
 	totalChannels = 1,
 ) {
 	return new Response(
@@ -123,6 +123,40 @@ describe("useRSSVideos", () => {
 				"Fox News Doesn't Support The Troops",
 			);
 		});
+	});
+
+	it("skips idle feed downloads but follows backfill, restore, and cache reset versions", async () => {
+		vi.useFakeTimers();
+		let cacheUpdatedAt: string | null = "2026-05-06T20:00:00.000Z";
+		let videoCalls = 0;
+		vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input).startsWith("/api/videos/status")) return statusResponse({ cacheUpdatedAt });
+			videoCalls++;
+			return videosResponse(cacheUpdatedAt ? [video(cacheUpdatedAt, "video-1", cacheUpdatedAt)] : [], cacheUpdatedAt);
+		}));
+		const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+		const { result, unmount } = renderHook(() => useRSSVideos(), {
+			wrapper: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>,
+		});
+		try {
+			await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+			await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+			expect(result.current.videos).toHaveLength(1);
+			await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+			expect(videoCalls).toBe(1);
+			for (const version of ["2026-05-06T20:05:00.000Z", "2026-05-06T19:00:00.000Z", null]) {
+				cacheUpdatedAt = version;
+				await act(async () => { await queryClient.invalidateQueries({ queryKey: ["server-videos-status"] }); });
+				await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+				await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+				expect(result.current.videos.map(item => item.title)).toEqual(version ? [version] : []);
+			}
+			expect(videoCalls).toBe(4);
+		} finally {
+			unmount();
+			queryClient.clear();
+			vi.useRealTimers();
+		}
 	});
 
 	it("keeps manual refresh quiet and leaves cached videos visible", async () => {

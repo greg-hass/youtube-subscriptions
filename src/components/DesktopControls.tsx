@@ -1,5 +1,4 @@
 import { Suspense, lazy } from "react";
-import { motion } from "framer-motion";
 import {
 	Download,
 	AlignJustify,
@@ -67,9 +66,7 @@ export const DesktopControls = ({
 		{!minimal && (
 			<>
 				{onRefresh && (
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<button
 						onClick={onRefresh}
 						disabled={isRefreshing}
 						aria-label={
@@ -84,14 +81,12 @@ export const DesktopControls = ({
 							className={`${ICON_MD} ${isRefreshing ? "animate-spin" : ""}`}
 						/>
 						<span>{isRefreshing ? `${refreshProgress}%` : "Refresh"}</span>
-					</motion.button>
+					</button>
 				)}
 
 				{/* Shorts Toggle */}
 				{onToggleShorts && (
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<button
 						onClick={onToggleShorts}
 						aria-label={showShorts ? "Hide Shorts" : "Show Shorts"}
 						aria-pressed={showShorts}
@@ -103,14 +98,12 @@ export const DesktopControls = ({
 						title={showShorts ? "Hide Shorts" : "Show Shorts"}
 					>
 						<Play className={ICON_MD} />
-					</motion.button>
+					</button>
 				)}
 
 				{/* Watched Toggle */}
 				{onToggleWatched && (
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<button
 						onClick={onToggleWatched}
 						aria-label={hideWatched ? "Show Watched" : "Hide Watched"}
 						aria-pressed={hideWatched}
@@ -126,7 +119,7 @@ export const DesktopControls = ({
 						) : (
 							<Eye className={ICON_MD} />
 						)}
-					</motion.button>
+					</button>
 				)}
 
 				{/* Sort */}
@@ -191,9 +184,7 @@ export const DesktopControls = ({
 
 				{/* Export OPML/JSON */}
 				<div className="relative">
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<button
 						onClick={onToggleExportMenu}
 						aria-label="Export subscriptions"
 						title="Export subscriptions"
@@ -201,7 +192,7 @@ export const DesktopControls = ({
 					>
 						<Download className="w-4 h-4" />
 						<span className="hidden sm:inline">Export</span>
-					</motion.button>
+					</button>
 
 					{showExportMenu && (
 						<>
@@ -230,21 +221,17 @@ export const DesktopControls = ({
 		)}
 
 		{/* Settings — always visible */}
-		<motion.button
-			whileHover={{ scale: 1.1 }}
-			whileTap={{ scale: 0.9 }}
+		<button
 			onClick={onOpenSettings}
 			aria-label="Settings"
 			className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-ios-800 transition-colors"
 			title="Settings"
 		>
 			<Settings className={ICON_MD} />
-		</motion.button>
+		</button>
 
 		{/* Theme Toggle — always visible */}
-		<motion.button
-			whileHover={{ scale: 1.1 }}
-			whileTap={{ scale: 0.9 }}
+		<button
 			onClick={onToggleTheme}
 			aria-label={theme === "light" ? "Use dark theme" : "Use light theme"}
 			title={theme === "light" ? "Use dark theme" : "Use light theme"}
@@ -255,6 +242,6 @@ export const DesktopControls = ({
 			) : (
 				<Sun className={ICON_MD} />
 			)}
-		</motion.button>
+		</button>
 	</div>
 );

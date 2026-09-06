@@ -340,6 +340,8 @@ function createApp({
 			appVersion: APP_PACKAGE.version,
 			node: process.version,
 			buildDate: process.env.BUILD_DATE || null,
+			buildId: process.env.BUILD_ID || null,
+			gitRevision: process.env.GIT_REVISION || null,
 		});
 	});
 
@@ -602,10 +604,11 @@ function createApp({
 				Number.isFinite(requestedLimit) && requestedLimit > 0
 					? Math.min(requestedLimit, ACTIVE_CHANNELS_MAX_LIMIT)
 					: ACTIVE_CHANNELS_DEFAULT_LIMIT;
-			const [status, activeChannels] = await Promise.all([
+			const [status, cacheStatus] = await Promise.all([
 				Promise.resolve(feedAggregator.getAggregationStatus()),
-				feedAggregator.getActiveChannels({ limit }),
+				appStore.readVideoCacheStatus(),
 			]);
+			const activeChannels = await feedAggregator.getActiveChannels({ limit, channelRefreshes: cacheStatus.channelRefreshes });
 			const total = Number(status.total) || 0;
 			const completed = Math.min(Number(status.current) || 0, total);
 			const active =
@@ -613,6 +616,7 @@ function createApp({
 			const failed = Number(status.errors) || 0;
 			res.json({
 				...status,
+				cacheUpdatedAt: cacheStatus.lastUpdated,
 				total,
 				completed,
 				active,

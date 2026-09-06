@@ -10,16 +10,25 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage --run",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/qa.mjs --test",
     "test:ui": "vitest --ui",
-    "type-check": "tsc -b --noEmit"
+    "type-check": "tsc -b --noEmit && tsc -p tsconfig.e2e.json",
+    "setup": "node scripts/setup.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "qa": "node scripts/qa.mjs",
+    "qa:dev": "node scripts/qa.mjs --dev",
+    "check": "bash scripts/check.sh",
+    "check:full": "bash scripts/check.sh --full",
+    "benchmark:ui": "node scripts/benchmark-ui.mjs",
+    "benchmark:status": "node scripts/benchmark-status.mjs",
+    "test:dev": "node scripts/qa.mjs --dev --test",
+    "check:performance": "npm run build && node scripts/benchmark-ui.mjs output/performance/check-ui.json 3 --verify && node scripts/benchmark-status.mjs output/performance/check-status.json --verify"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.8",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@tanstack/react-virtual": "^3.13.12",
     "fast-xml-parser": "^5.3.2",
-    "framer-motion": "^12.23.24",
     "lucide-react": "^0.553.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -53,5 +62,8 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^1.1.0",
     "vitest": "^4.0.13"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }

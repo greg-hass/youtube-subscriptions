@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { motion } from "framer-motion";
 import { Activity, Heart, ListOrdered, Plus, Upload } from "lucide-react";
 
 const OPMLUpload = lazy(() =>
@@ -19,10 +18,7 @@ export const FirstRunOnboarding = ({
 		data-testid="first-run-onboarding"
 		className="mx-auto flex min-h-[calc(100dvh-var(--app-header-height))] max-w-lg flex-col justify-center overflow-y-auto px-4 py-6 sm:py-8"
 	>
-		<motion.div
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.4 }}
+		<div
 			className="w-full"
 		>
 			{/* Title */}
@@ -139,6 +135,6 @@ export const FirstRunOnboarding = ({
 			<p className="mt-5 text-center text-xs text-gray-400 dark:text-ios-600">
 				Your feed refreshes automatically once channels are added.
 			</p>
-		</motion.div>
+		</div>
 	</main>
 );

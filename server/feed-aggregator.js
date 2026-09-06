@@ -542,15 +542,15 @@ function createFeedAggregator(storeOverride) {
 		};
 	}
 
-	async function getActiveChannels({ limit = 5 } = {}) {
+	async function getActiveChannels({ limit = 5, channelRefreshes } = {}) {
 		try {
-			const [data, videoCache] = await Promise.all([
+			const [data, refreshes] = await Promise.all([
 				store.readData(DEFAULT_DATA),
-				store.readVideoCache({ videos: [] }),
+				channelRefreshes ?? store.readVideoCacheStatus().then((cache) => cache.channelRefreshes),
 			]);
 			return getNextChannelsForRefresh(
 				data.subscriptions || [],
-				videoCache.channelRefreshes || {},
+				refreshes || {},
 				{ limit },
 			);
 		} catch (error) {

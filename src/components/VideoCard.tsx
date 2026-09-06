@@ -4,7 +4,6 @@ import {
 	Heart,
 	Check,
 	CheckCircle2,
-	Trash2,
 	Radio,
 	PictureInPicture2,
 } from "lucide-react";
@@ -18,12 +17,10 @@ import {
 	isLikelyLowResolutionYouTubePlaceholder,
 } from "../lib/video-thumbnails";
 import { useFavoriteVideos } from "../hooks/useFavoriteVideos";
-import { useQueuedVideos } from "../hooks/useQueuedVideos";
 import {
 	clearVideoProgress,
 	getVideoProgress,
 	getVideoProgressPercent,
-	markVideoProgressRemoved,
 	saveVideoProgress,
 } from "../lib/video-progress";
 import {
@@ -43,11 +40,9 @@ interface Props {
 	channelThumbnail?: string;
 	onInlinePlaybackChange?: (videoId: string, isPlaying: boolean) => void;
 	onUnavailable?: (videoId: string) => void;
-	context?: "latest" | "queue";
 }
 
 const SWIPE_TO_WATCHED_THRESHOLD = 80;
-const SWIPE_TO_QUEUE_THRESHOLD = 80;
 const SWIPE_VERTICAL_CANCEL_THRESHOLD = 48;
 const SWIPE_HINT_THRESHOLD = 12;
 
@@ -56,7 +51,6 @@ const StatefulVideoCard = ({
 	channelThumbnail,
 	onInlinePlaybackChange,
 	onUnavailable,
-	context = "latest",
 }: Props) => {
 	const isLikelyShort =
 		video.isShort === true || isShortVideo({ ...video, isShort: undefined });
@@ -76,10 +70,8 @@ const StatefulVideoCard = ({
 		pointerId: number;
 	} | null>(null);
 	const { isFavoriteVideo, toggleFavoriteVideo } = useFavoriteVideos();
-	const { removeQueuedVideo } = useQueuedVideos();
 	const { watchedVideos, markAsWatched, markAsUnwatched } = useStore();
 	const isFavorite = isFavoriteVideo(video.id);
-	const isInQueueContext = context === "queue";
 	const [progressPercent, setProgressPercent] = useState(() =>
 		getVideoProgressPercent(video.id),
 	);
@@ -278,8 +270,6 @@ const StatefulVideoCard = ({
 
 		const deltaX = event.clientX - pointerStart.x;
 		const shouldMarkWatched = deltaX <= -SWIPE_TO_WATCHED_THRESHOLD;
-		const shouldRemoveFromQueue =
-			isInQueueContext && deltaX >= SWIPE_TO_QUEUE_THRESHOLD;
 
 		pointerStartRef.current = null;
 		setDragOffsetX(0);
@@ -290,13 +280,6 @@ const StatefulVideoCard = ({
 				setProgressPercent(0);
 				markAsWatched(video.id);
 			}
-		} else if (shouldRemoveFromQueue) {
-			// Queue context: every video here is either queued (Watch later) or has
-			// resume progress (Continue watching). Clear the queue and flag the
-			// progress as user-removed so a later resume in Latest doesn't
-			// resurrect the card before the user re-engages with it on purpose.
-			removeQueuedVideo(video.id);
-			markVideoProgressRemoved(video.id);
 		}
 	};
 
@@ -405,33 +388,11 @@ const StatefulVideoCard = ({
 			style={{ transform: `translateX(${dragOffsetX}px)` }}
 			className="group relative flex h-full touch-pan-y flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-colors duration-200 hover:border-gray-300 dark:border-ios-800 dark:bg-ios-900 dark:hover:border-ios-700 sm:hover:shadow-xl"
 		>
-			{(dragOffsetX < -SWIPE_HINT_THRESHOLD ||
-				(isInQueueContext && dragOffsetX > SWIPE_HINT_THRESHOLD)) && (
-				<div
-					className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-sm font-semibold ${
-						dragOffsetX < 0
-							? "bg-emerald-600/15 text-emerald-700 dark:text-emerald-200"
-							: "bg-blue-600/15 text-blue-700 dark:text-blue-200"
-					}`}
-				>
-					<div
-						className={`flex items-center gap-2 rounded-full px-3 py-1.5 shadow-sm ${
-							dragOffsetX < 0
-								? "bg-emerald-600/90 text-white"
-								: "bg-blue-600/90 text-white"
-						}`}
-					>
-						{dragOffsetX < 0 ? (
-							<>
-								<CheckCircle2 className="h-5 w-5" />
-								<span>{isWatched ? "Watched" : "Mark watched"}</span>
-							</>
-						) : isInQueueContext ? (
-							<>
-								<Trash2 className="h-5 w-5" />
-								<span>Remove from queue</span>
-							</>
-						) : null}
+			{dragOffsetX < -SWIPE_HINT_THRESHOLD && (
+				<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-emerald-600/15 text-sm font-semibold text-emerald-700 dark:text-emerald-200">
+					<div className="flex items-center gap-2 rounded-full bg-emerald-600/90 px-3 py-1.5 text-white shadow-sm">
+						<CheckCircle2 className="h-5 w-5" />
+						<span>{isWatched ? "Watched" : "Mark watched"}</span>
 					</div>
 				</div>
 			)}

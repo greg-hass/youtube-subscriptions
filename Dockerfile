@@ -1,5 +1,5 @@
 # Frontend build stage
-FROM node:20-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -7,10 +7,12 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+ARG BUILD_ID=local
+ENV BUILD_ID=$BUILD_ID
 RUN npm run build
 
 # Backend dependency stage
-FROM node:20-alpine AS backend-deps
+FROM node:24-alpine AS backend-deps
 
 WORKDIR /app/server
 
@@ -20,7 +22,11 @@ COPY server/package*.json ./
 RUN npm ci --omit=dev
 
 # Production stage: nginx serves the PWA, Node serves /api behind nginx.
-FROM node:20-alpine
+FROM node:24-alpine
+
+ARG BUILD_ID=local
+ARG GIT_REVISION=unknown
+ENV BUILD_ID=$BUILD_ID GIT_REVISION=$GIT_REVISION
 
 RUN apk add --no-cache nginx curl \
   && sed -i '/^user /d' /etc/nginx/nginx.conf

@@ -34,6 +34,7 @@ export interface ScheduledRefreshStatus {
 }
 
 interface AggregationStatus {
+	cacheUpdatedAt?: string | null;
 	state: "idle" | "running" | "error";
 	current: number;
 	total: number;
@@ -153,7 +154,7 @@ function useAggregationStatus(refreshTriggered: boolean, enabled: boolean) {
 	});
 }
 
-function useServerVideos(isAggregating: boolean, enabled: boolean) {
+function useServerVideos(isAggregating: boolean, enabled: boolean, hasCacheVersion: boolean) {
 	return useQuery({
 		queryKey: ["server-videos"],
 		enabled,
@@ -177,7 +178,9 @@ function useServerVideos(isAggregating: boolean, enabled: boolean) {
 			) {
 				return false;
 			}
-			return isAggregating ? 3000 : 1000 * 10;
+			if (isAggregating) return 3000;
+			// Older servers do not expose the authoritative cache version yet.
+			return hasCacheVersion ? false : 1000 * 10;
 		},
 	});
 }
@@ -408,10 +411,16 @@ export const useRSSVideos = ({ enabled = true }: UseRSSVideosOptions = {}) => {
 		dataUpdatedAt: serverDataUpdatedAt,
 		isLoading,
 		error,
-	} = useServerVideos(isAggregating, enabled);
+	} = useServerVideos(isAggregating, enabled, aggregationStatus?.cacheUpdatedAt !== undefined);
 
 	// Invalidate video cache when status indicates newer data
 	useEffect(() => {
+		if (aggregationStatus?.cacheUpdatedAt !== undefined && serverData) {
+			if (aggregationStatus.cacheUpdatedAt !== (serverData.lastUpdated ?? null)) {
+				queryClient.invalidateQueries({ queryKey: ["server-videos"] });
+			}
+			return;
+		}
 		if (!aggregationStatus?.lastUpdated || !serverData?.lastUpdated) return;
 
 		const statusUpdatedAt = new Date(aggregationStatus.lastUpdated).getTime();
@@ -424,7 +433,7 @@ export const useRSSVideos = ({ enabled = true }: UseRSSVideosOptions = {}) => {
 		) {
 			queryClient.invalidateQueries({ queryKey: ["server-videos"] });
 		}
-	}, [aggregationStatus?.lastUpdated, queryClient, serverData?.lastUpdated]);
+	}, [aggregationStatus?.cacheUpdatedAt, aggregationStatus?.lastUpdated, queryClient, serverData]);
 
 	useRefreshLifecycle(
 		refreshTriggered,

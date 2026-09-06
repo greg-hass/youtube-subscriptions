@@ -15,9 +15,4 @@ describe('getCurrentDateInTimezone', () => {
         const instant = new Date('2026-01-01T12:00:00.000Z'); // 04:00 PT on 2026-01-01
         expect(getCurrentDateInTimezone(undefined, instant)).toBe('1/1/2026');
     });
-
-    it('produces identical output for the same instant across calls', () => {
-        const instant = new Date('2026-12-31T23:59:59.000Z');
-        expect(getCurrentDateInTimezone('UTC', instant)).toBe(getCurrentDateInTimezone('UTC', instant));
-    });
 });

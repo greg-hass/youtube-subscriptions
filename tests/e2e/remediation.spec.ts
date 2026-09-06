@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const syncSnapshot = {
 	subscriptions: [
@@ -89,6 +90,7 @@ async function mockHealthyApi(page: Page) {
 			return;
 		}
 
+		expect(["/api/health", "/api/version", "/api/videos/refresh"]).toContain(path);
 		await route.fulfill({ status: 200, json: { success: true } });
 	});
 }
@@ -105,6 +107,20 @@ test("mobile Add remains clickable and production omits query devtools", async (
 	await expect(
 		page.getByRole("button", { name: /open tanstack query devtools/i }),
 	).toHaveCount(0);
+	const toolbarActions = page.getByTestId("latest-toolbar-actions");
+	const live = toolbarActions.getByRole("button", { name: "Live", exact: true });
+	const filters = toolbarActions.getByRole("button", { name: "Filters", exact: true });
+	await expect(live).toBeVisible();
+	await expect(filters).toBeVisible();
+	const liveBox = (await live.boundingBox())!;
+	const filtersBox = (await filters.boundingBox())!;
+	expect(Math.abs(liveBox.y - filtersBox.y)).toBeLessThanOrEqual(1);
+	expect(liveBox.x).toBeGreaterThanOrEqual(0);
+	expect(liveBox.x + liveBox.width).toBeLessThanOrEqual(filtersBox.x);
+	expect(filtersBox.x + filtersBox.width).toBeLessThanOrEqual(390);
+	const tabBarBox = (await tabBar.boundingBox())!;
+	expect(tabBarBox.y + tabBarBox.height).toBeLessThanOrEqual(844);
+	expect(liveBox.y + liveBox.height).toBeLessThanOrEqual(tabBarBox.y);
 
 	await tabBar.getByRole("button", { name: "Add", exact: true }).click();
 	await expect(page.getByText("Add Channel", { exact: true })).toBeVisible();
@@ -257,6 +273,14 @@ test("mobile video cards keep thumbnails clear, expose PiP handoff, and show wat
 	expect((watchedBox?.x || 0) + (watchedBox?.width || 0)).toBeLessThanOrEqual(
 		favoriteBox?.x || 0,
 	);
+	const detailsBox = (await page.getByTestId("video-card-info").boundingBox())!;
+	expect(favoriteBox!.y).toBeGreaterThanOrEqual(detailsBox.y);
+	expect(favoriteBox!.x + favoriteBox!.width).toBeLessThanOrEqual(
+		detailsBox.x + detailsBox.width,
+	);
+	expect(favoriteBox!.y + favoriteBox!.height).toBeLessThanOrEqual(
+		detailsBox.y + detailsBox.height,
+	);
 
 	await page.getByRole("button", { name: "Mark video as watched" }).click();
 	await expect(page.getByTestId("video-watched-indicator")).toBeVisible();
@@ -288,6 +312,10 @@ test("an invalid stored token shows recovery instead of an endless loader", asyn
 test("authenticated desktop feed supports favorites and Settings workflows", async ({
 	page,
 }) => {
+	let healthRequests = 0;
+	page.on("request", request => {
+		if (new URL(request.url()).pathname === "/api/health") healthRequests++;
+	});
 	await page.setViewportSize({ width: 1440, height: 900 });
 	await mockHealthyApi(page);
 	await page.goto("/");
@@ -317,6 +345,14 @@ test("authenticated desktop feed supports favorites and Settings workflows", asy
 
 	await expect(page.getByText("Fox News Doesn't Support The Troops")).toBeVisible();
 
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
+	expect(healthRequests).toBe(0);
+	const settingsButton = page.getByRole("button", { name: "Settings", exact: true });
+	await settingsButton.click();
+	await expect(page.getByText("Settings", { exact: true })).toBeVisible();
+	await expect.poll(() => healthRequests).toBeGreaterThan(0);
+	await page.keyboard.press("Escape");
+	await expect(page.getByText("Settings", { exact: true })).not.toBeVisible();
+	await expect(settingsButton).toBeFocused();
+	await settingsButton.click();
 	await expect(page.getByText("Settings", { exact: true })).toBeVisible();
 });

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import type { YouTubeVideo } from '../types/youtube';
 import { readRawStorage, parseVideoIds, parseVideos } from './local-storage-list';
 
@@ -6,11 +6,27 @@ const IDS_STORAGE_KEY = 'favorite-video-ids';
 const VIDEOS_STORAGE_KEY = 'favorite-videos';
 const FAVORITES_CHANGED_EVENT = 'favorite-videos-changed';
 
+const EMPTY_SNAPSHOT = { favoriteVideoIds: new Set<string>(), favoriteVideos: [] as YouTubeVideo[] };
+let cachedIds: string | null | undefined;
+let cachedVideos: string | null | undefined;
+let cachedSnapshot = EMPTY_SNAPSHOT;
+
 function getFavoriteSnapshot() {
-  return JSON.stringify({
-    ids: readRawStorage(IDS_STORAGE_KEY),
-    videos: readRawStorage(VIDEOS_STORAGE_KEY),
-  });
+  const rawIds = readRawStorage(IDS_STORAGE_KEY);
+  const rawVideos = readRawStorage(VIDEOS_STORAGE_KEY);
+  if (rawIds === cachedIds && rawVideos === cachedVideos) return cachedSnapshot;
+
+  const ids = new Set(parseVideoIds(rawIds));
+  const videosById = new Map<string, YouTubeVideo>();
+  for (const video of parseVideos(rawVideos)) {
+    ids.add(video.id);
+    if (!videosById.has(video.id)) videosById.set(video.id, video);
+  }
+
+  cachedIds = rawIds;
+  cachedVideos = rawVideos;
+  cachedSnapshot = { favoriteVideoIds: ids, favoriteVideos: Array.from(videosById.values()) };
+  return cachedSnapshot;
 }
 
 function subscribeToFavorites(onStoreChange: () => void) {
@@ -30,24 +46,9 @@ function writeFavorites(ids: Set<string>, videosById: Map<string, YouTubeVideo>)
 }
 
 export function useFavoriteVideos() {
-  const snapshot = useSyncExternalStore(subscribeToFavorites, getFavoriteSnapshot, () => '{"ids":null,"videos":null}');
-
-  const { favoriteVideoIds, favoriteVideos } = useMemo(() => {
-    const snapshotValue = JSON.parse(snapshot) as { ids: string | null; videos: string | null };
-    const ids = new Set(parseVideoIds(snapshotValue.ids));
-    const videos = parseVideos(snapshotValue.videos);
-
-    for (const video of videos) {
-      ids.add(video.id);
-    }
-
-    return {
-      favoriteVideoIds: ids,
-      favoriteVideos: videos.filter((video, index, allVideos) => (
-        allVideos.findIndex((candidate) => candidate.id === video.id) === index
-      )),
-    };
-  }, [snapshot]);
+  const { favoriteVideoIds, favoriteVideos } = useSyncExternalStore(
+    subscribeToFavorites, getFavoriteSnapshot, () => EMPTY_SNAPSHOT,
+  );
 
   const toggleFavoriteVideo = useCallback((video: YouTubeVideo | string) => {
     const videoId = typeof video === 'string' ? video : video.id;

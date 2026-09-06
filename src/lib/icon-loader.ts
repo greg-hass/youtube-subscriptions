@@ -1,67 +1,8 @@
 import { CORS_PROXIES, buildProxiedUrl } from './cors-proxies';
-import externalServices from './external-services.json';
 
 const channelThumbnailCache = new Map<string, string>();
 const failedChannelThumbnailCache = new Set<string>();
 const inflightThumbnailRequests = new Map<string, Promise<string | null>>();
-const directThumbnailCache = new Map<string, string>();
-type InvidiousThumbnail = { url?: string; width?: number };
-
-// Enhanced rate limiting with exponential backoff
-interface RateLimitState {
-  lastRequestTime: number;
-  failureCount: number;
-  baseDelay: number;
-}
-
-const rateLimitState: RateLimitState = {
-  lastRequestTime: 0,
-  failureCount: 0,
-  baseDelay: 1000 // 1 second base delay
-};
-
-/**
- * Enhanced rate limiting with exponential backoff to avoid 429 errors
- */
-async function rateLimitRequest(): Promise<void> {
-  const now = Date.now();
-  const timeSinceLastRequest = now - rateLimitState.lastRequestTime;
-
-  // Calculate delay with exponential backoff based on failures
-  const currentDelay = Math.min(
-    rateLimitState.baseDelay * Math.pow(2, rateLimitState.failureCount),
-    30000 // Max 30 seconds
-  );
-
-  if (timeSinceLastRequest < currentDelay) {
-    const waitTime = currentDelay - timeSinceLastRequest;
-    // Only log significant delays to reduce console spam
-    if (waitTime > 2000) {
-      console.warn(`⏳ Rate limiting: waiting ${waitTime}ms (backoff level: ${rateLimitState.failureCount})`);
-    }
-    await new Promise(resolve => setTimeout(resolve, waitTime));
-  }
-
-  rateLimitState.lastRequestTime = Date.now();
-}
-
-/**
- * Record a successful request to reset backoff
- */
-function recordSuccess(): void {
-  rateLimitState.failureCount = Math.max(0, rateLimitState.failureCount - 1);
-}
-
-/**
- * Record a failed request to increase backoff
- */
-function recordFailure(): void {
-  rateLimitState.failureCount = Math.min(rateLimitState.failureCount + 1, 5);
-}
-
-/**
- * Utility functions for handling channel icon loading with multiple fallback strategies
- */
 
 /**
  * Extract the best thumbnail URL from a YouTube channel HTML page
@@ -152,15 +93,12 @@ export async function resolveChannelThumbnail(channelId: string): Promise<string
 
         if (thumbnail) {
           channelThumbnailCache.set(channelId, thumbnail);
-          recordSuccess();
           return thumbnail;
         } else {
           // Try next proxy
           continue;
         }
       } catch {
-        recordFailure();
-
         // If this is not the last proxy, try the next one
         if (i < CORS_PROXIES.length - 1) {
           continue;
@@ -178,116 +116,6 @@ export async function resolveChannelThumbnail(channelId: string): Promise<string
   inflightThumbnailRequests.delete(channelId);
 
   return result;
-}
-
-/**
- * Try direct YouTube thumbnail URLs that don't require proxies
- */
-async function tryDirectThumbnailUrls(channelId: string): Promise<string | null> {
-  // Check cache first
-  if (directThumbnailCache.has(channelId)) {
-    return directThumbnailCache.get(channelId)!;
-  }
-
-  const directUrls = [
-    `https://yt3.ggpht.com/a/${channelId}=s800-c-k-c0x00ffffff-no-rj-mo`,  // 800x800 - maximum quality for thumbnails
-    `https://yt3.ggpht.com/a/${channelId}=s600-c-k-c0x00ffffff-no-rj-mo`,   // 600x600 - high quality fallback
-    `https://i.ytimg.com/i/${channelId}/hqdefault.jpg`,  // high quality
-    `https://i.ytimg.com/channel/${channelId}/hqdefault.jpg`  // high quality
-  ];
-
-  for (let i = 0; i < directUrls.length; i++) {
-    const url = directUrls[i];
-
-    try {
-      await rateLimitRequest();
-      const response = await fetch(url, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(5000) // 5 second timeout
-      });
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('image')) {
-          // Cache the successful URL
-          directThumbnailCache.set(channelId, url);
-          recordSuccess();
-          return url;
-        }
-      }
-    } catch {
-      recordFailure();
-      // Silently handle individual URL failures to reduce console spam
-    }
-  }
-
-  return null;
-}
-
-/**
- * Fetch channel thumbnail using Invidious API
- * This is more reliable than scraping YouTube via proxies
- */
-async function fetchFromInvidious(channelId: string): Promise<string | null> {
-  // Check cache first (shared with other methods)
-  if (channelThumbnailCache.has(channelId)) {
-    return channelThumbnailCache.get(channelId)!;
-  }
-
-  for (const instance of externalServices.invidiousInstances) {
-    try {
-      await rateLimitRequest();
-      const response = await fetch(`${instance}/api/v1/channels/${channelId}`, {
-        signal: AbortSignal.timeout(5000)
-      });
-
-      if (!response.ok) continue;
-
-      const data = await response.json() as { authorThumbnails?: InvidiousThumbnail[] };
-      // Invidious returns an array of thumbnails, we want the highest quality one
-      const thumbnails = data.authorThumbnails || [];
-      const bestThumbnail = thumbnails.sort((a, b) => (b.width || 0) - (a.width || 0))[0];
-
-      if (bestThumbnail?.url) {
-        const url = bestThumbnail.url.startsWith('http')
-          ? bestThumbnail.url
-          : `${instance}${bestThumbnail.url}`; // Handle relative URLs
-
-        channelThumbnailCache.set(channelId, url);
-        recordSuccess();
-        return url;
-      }
-    } catch {
-      recordFailure();
-      // Continue to next instance
-    }
-  }
-  return null;
-}
-
-/**
- * Find the first working thumbnail URL for a channel
- */
-export async function findWorkingThumbnail(channelId: string): Promise<string> {
-  // 1. Try Invidious API first (most reliable, JSON API)
-  const invidiousThumbnail = await fetchFromInvidious(channelId);
-  if (invidiousThumbnail) {
-    return invidiousThumbnail;
-  }
-
-  // 2. Try direct URLs (fastest if they work, but often don't for new channels)
-  const directThumbnail = await tryDirectThumbnailUrls(channelId);
-  if (directThumbnail) {
-    return directThumbnail;
-  }
-
-  // 3. Fallback to proxy-based scraping (slowest, brittle)
-  const resolved = await resolveChannelThumbnail(channelId);
-
-  if (resolved) {
-    return resolved;
-  }
-
-  return generatePlaceholderThumbnail(channelId);
 }
 
 /**
@@ -349,38 +177,4 @@ export function handleImageLoadError(
 
   // Immediately use placeholder; network attempts are handled elsewhere to avoid console spam
   target.src = fallbackPlaceholder;
-}
-
-/**
- * Preload and cache channel thumbnails
- */
-export async function preloadChannelThumbnails(channelIds: string[]): Promise<Map<string, string>> {
-  const thumbnailMap = new Map<string, string>();
-
-  const promises = channelIds.map(async (channelId) => {
-    const workingUrl = await findWorkingThumbnail(channelId);
-    thumbnailMap.set(channelId, workingUrl);
-  });
-
-  await Promise.all(promises);
-  return thumbnailMap;
-}
-
-/**
- * Clear the failed thumbnail cache to allow retrying failed channels
- */
-export function clearFailedThumbnailCache(): void {
-  console.log(`🧹 Clearing failed thumbnail cache (${failedChannelThumbnailCache.size} channels)`);
-  failedChannelThumbnailCache.clear();
-}
-
-/**
- * Clear the thumbnail cache completely
- */
-export function clearAllThumbnailCache(): void {
-  console.log(`🧹 Clearing all thumbnail caches (${channelThumbnailCache.size} cached, ${failedChannelThumbnailCache.size} failed, ${directThumbnailCache.size} direct)`);
-  channelThumbnailCache.clear();
-  failedChannelThumbnailCache.clear();
-  directThumbnailCache.clear();
-  inflightThumbnailRequests.clear();
 }

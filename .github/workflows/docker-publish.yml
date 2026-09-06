@@ -43,7 +43,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: npm
           cache-dependency-path: |
             package-lock.json
@@ -57,7 +57,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: server/node_modules
-          key: server-node-modules-${{ runner.os }}-${{ runner.arch }}-node20-${{ hashFiles('server/package.json', 'server/package-lock.json') }}
+          key: server-node-modules-${{ runner.os }}-${{ runner.arch }}-node24-${{ hashFiles('server/package.json', 'server/package-lock.json') }}
 
       - name: Install server dependencies
         if: steps.server-dependencies.outputs.cache-hit != 'true'
@@ -92,15 +92,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install frontend dependencies
         run: npm ci --prefer-offline
 
-      - name: Build frontend
-        run: npm run build
+      - name: Install server dependencies
+        run: npm ci --prefix server
 
       - name: Restore Playwright browser
         uses: actions/cache@v6
@@ -111,11 +111,47 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Test development startup
+        run: npm run test:dev
+
       - name: Test production browser flows
         run: npm run test:e2e
 
+      - name: Verify deterministic performance budgets
+        run: npm run check:performance
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence
+          path: |
+            output/qa/*/playwright/
+            output/qa/*/report/
+            output/qa/*/server.log
+            output/performance/check-*.json
+          retention-days: 7
+
+  container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose configuration
+        run: SERVER_API_TOKEN=ci-validation-token docker compose config --quiet
+      - name: Smoke test production container
+        run: bash scripts/container-smoke.sh
+      - name: Upload container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-evidence
+          path: output/container/
+          retention-days: 7
+
   publish:
-    needs: [browser, quality, secrets]
+    needs: [browser, quality, secrets, container]
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     permissions:
@@ -141,6 +177,9 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
+          build-args: |
+            BUILD_ID=${{ github.sha }}
+            GIT_REVISION=${{ github.sha }}
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha

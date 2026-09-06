@@ -1,0 +1,107 @@
+{
+  "fixture": {
+    "channels": 200,
+    "videos": 3000,
+    "favorites": 500,
+    "progress": 1000,
+    "cpuThrottle": 4,
+    "viewport": "1440x900"
+  },
+  "results": [
+    {
+      "run": 1,
+      "loadMs": 674.980542,
+      "initial": {
+        "scriptMs": 213.851,
+        "taskMs": 411.416,
+        "reads": 402,
+        "bytesRead": 35302402,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 22.55299999999999,
+        "taskMs": 133.03699999999995,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 99.39399999999998,
+        "taskMs": 318.057,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      },
+      "idle12s": {
+        "feedRequests": 0,
+        "statusRequests": 2,
+        "feedBytes": 0,
+        "scriptMs": 5.541999999999991,
+        "taskMs": 76.80599999999993,
+        "storageReads": 0,
+        "storageBytesRead": 0,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 2,
+      "loadMs": 587.8402920000008,
+      "initial": {
+        "scriptMs": 207.323,
+        "taskMs": 431.85699999999997,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 21.644,
+        "taskMs": 78.19300000000001,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 90.923,
+        "taskMs": 301.165,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    },
+    {
+      "run": 3,
+      "loadMs": 561.3297919999986,
+      "initial": {
+        "scriptMs": 214.90300000000002,
+        "taskMs": 406.4,
+        "reads": 404,
+        "bytesRead": 35488244,
+        "parses": 3,
+        "bytesParsed": 262733
+      },
+      "favorite": {
+        "scriptMs": 22.205000000000002,
+        "taskMs": 132.34,
+        "storageReads": 232,
+        "storageBytesRead": 21008577,
+        "jsonParses": 4,
+        "jsonBytesParsed": 371319
+      },
+      "search": {
+        "scriptMs": 96.226,
+        "taskMs": 310.86,
+        "storageReads": 220,
+        "storageBytesRead": 19261450,
+        "jsonParses": 0,
+        "jsonBytesParsed": 0
+      }
+    }
+  ]
+}

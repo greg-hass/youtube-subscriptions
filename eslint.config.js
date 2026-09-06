@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-	globalIgnores(["dist", ".vite", "node_modules", "coverage"]),
+	globalIgnores(["dist", ".vite", "node_modules", "coverage", "output"]),
 	{
 		files: ["server/**/*.js"],
 		ignores: ["server/**/*.test.js"],

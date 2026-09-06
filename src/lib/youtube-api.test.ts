@@ -11,7 +11,6 @@ vi.mock('../store/useStore', () => ({
 
 vi.mock('./scrapers', () => ({
     scrapeChannelId: vi.fn(() => Promise.resolve(null)),
-    fetchChannelInfoFallback: vi.fn(() => Promise.resolve(null)),
 }));
 
 vi.mock('./fallback-api', () => ({

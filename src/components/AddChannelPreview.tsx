@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Check, Plus } from "lucide-react";
 import { formatSubscriberCount, formatVideoCount } from "./channelSearch";
 import type { YouTubeChannel } from "../types/youtube";
@@ -14,7 +13,7 @@ interface AddChannelPreviewProps {
 /**
  * Preview card for a single channel — used both for direct-identifier
  * results and for keyword-search results. Always wraps in a motion
- * section so the parent can mount it inside an AnimatePresence.
+ * section for reviewing a channel before subscribing.
  */
 export const AddChannelPreview = ({
 	channel,
@@ -27,10 +26,7 @@ export const AddChannelPreview = ({
 	const videoCount = formatVideoCount(channel.videoCount);
 
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: -4 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, y: -4 }}
+		<section
 			className="rounded-b-xl border-x border-b border-gray-200 bg-white p-4 shadow-sm dark:border-ios-800 dark:bg-ios-900"
 		>
 			<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
@@ -89,7 +85,7 @@ export const AddChannelPreview = ({
 					Dismiss
 				</button>
 			</div>
-		</motion.section>
+		</section>
 	);
 };
 

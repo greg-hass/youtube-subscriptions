@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getVideoIdsOlderThan, getVisibleVideoIds } from './feed-bulk-actions';
+import { getVideoIdsOlderThan } from './feed-bulk-actions';
 import type { YouTubeVideo } from '../types/youtube';
 
 const videos: YouTubeVideo[] = [
@@ -42,9 +42,6 @@ const videos: YouTubeVideo[] = [
 ];
 
 describe('feed bulk actions', () => {
-  it('returns ids for visible videos in order', () => {
-    expect(getVisibleVideoIds(videos)).toEqual(['old', 'cutoff', 'new', 'bad-date']);
-  });
 
   it('returns ids older than a day threshold', () => {
     expect(getVideoIdsOlderThan(videos, {

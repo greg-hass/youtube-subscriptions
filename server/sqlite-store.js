@@ -436,6 +436,12 @@ function createSqliteStore({
 		async readVideoCache(fallback) {
 			return getVideoCacheSnapshot(fallback);
 		},
+		async readVideoCacheStatus() {
+			const metadata = getDb().prepare(
+				"SELECT json_extract(value_json, '$.lastUpdated') AS lastUpdated FROM app_state WHERE key = 'video_cache_metadata'",
+			).get();
+			return { lastUpdated: metadata?.lastUpdated ?? null, channelRefreshes: getChannelRefreshes() };
+		},
 		async writeVideoCache(cache) {
 			writeVideoCacheSnapshot(cache);
 			return getVideoCacheSnapshot(cache);

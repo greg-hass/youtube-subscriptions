@@ -53,7 +53,7 @@ export function getHighResolutionVideoThumbnail(thumbnail: string, options: Vide
 }
 
 export function getNextVideoThumbnailFallback(currentThumbnail: string, options: VideoThumbnailOptions = {}): string | null {
-  const qualityOrder = options.isShort || isShortsThumbnailCandidate(currentThumbnail)
+  const qualityOrder = options.isShort || isPortraitVideoThumbnail(currentThumbnail)
     ? YOUTUBE_SHORTS_THUMBNAIL_QUALITY_ORDER
     : YOUTUBE_THUMBNAIL_QUALITY_ORDER;
   const currentQualityIndex = qualityOrder.findIndex((quality) => {
@@ -90,12 +90,8 @@ function isYouTubeVideoThumbnail(thumbnail: string): boolean {
   }
 }
 
-function isShortsThumbnailCandidate(thumbnail: string): boolean {
-  return /\/(?:oar2|maxres2|hq2|frame0)\.(?:jpg|webp)(?:\?|$)/i.test(thumbnail);
-}
-
 export function isPortraitVideoThumbnail(thumbnail: string): boolean {
-  return isShortsThumbnailCandidate(thumbnail);
+  return /\/(?:oar2|maxres2|hq2|frame0)\.(?:jpg|webp)(?:\?|$)/i.test(thumbnail);
 }
 
 export function isLikelyLowResolutionYouTubePlaceholder(thumbnail: string, image: Pick<HTMLImageElement, 'naturalWidth' | 'naturalHeight'>): boolean {

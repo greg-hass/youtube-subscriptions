@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   ExternalLink,
   Users,
@@ -50,8 +49,7 @@ export const SubscriptionCard = memo(
     };
 
     return (
-      <motion.div
-        whileHover={{ y: -8, scale: 1.02 }}
+      <div
         onClick={openChannel}
         className="group cursor-pointer bg-white dark:bg-ios-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-ios-800"
       >
@@ -169,20 +167,15 @@ export const SubscriptionCard = memo(
           </div>
 
           {/* Hover overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 1 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none"
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none opacity-0 group-hover:opacity-100"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              whileHover={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 300 }}
+            <div
               className="bg-white/90 dark:bg-ios-900/90 rounded-full p-3"
             >
               <ExternalLink className="w-6 h-6 text-red-600" />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Unsubscribe button — tightened hit area; Undo toast in SubscriptionsList is the safety net */}
           {onRemove && (
@@ -263,7 +256,7 @@ export const SubscriptionCard = memo(
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     );
   },
 );

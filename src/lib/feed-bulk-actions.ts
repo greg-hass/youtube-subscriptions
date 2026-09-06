@@ -5,10 +5,6 @@ type OlderThanOptions = {
   days: number;
 };
 
-export function getVisibleVideoIds(videos: readonly YouTubeVideo[]): string[] {
-  return videos.map((video) => video.id);
-}
-
 export function getVideoIdsOlderThan(
   videos: readonly YouTubeVideo[],
   { now = Date.now(), days }: OlderThanOptions,

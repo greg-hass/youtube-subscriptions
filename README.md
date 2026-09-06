@@ -36,8 +36,7 @@ in that browser.
 ### Local Development
 
 ```bash
-npm install
-cd server && npm install && cd ..
+node scripts/setup.mjs # select Node 24 first
 npm run dev
 ```
 
@@ -252,3 +251,10 @@ changes, and preserve the RSS-first default.
 ## License
 
 MIT
+
+### Isolated agent and QA environment
+
+Use Node 24, then run `node scripts/setup.mjs` and `npm run qa` for a seeded,
+authenticated browser against a disposable database and real API. `npm run qa:dev`
+provides HMR. `npm run check:full` runs the verification loop and reports any
+unavailable container checks explicitly. See [setup, worktrees, and debugging](docs/agent-development.md).

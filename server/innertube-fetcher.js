@@ -85,7 +85,7 @@ function getInnerTubeCredentials() {
 	try {
 		const path = require("node:path");
 		const fs = require("node:fs");
-		const credsPath = path.join(__dirname, "data", "innertube-creds.json");
+		const credsPath = path.join(process.env.MYTUBE_DATA_DIR || path.join(__dirname, "data"), "innertube-creds.json");
 		if (fs.existsSync(credsPath)) {
 			const creds = JSON.parse(fs.readFileSync(credsPath, "utf-8"));
 			const cookieString = creds.cookieString || creds.cookie;
